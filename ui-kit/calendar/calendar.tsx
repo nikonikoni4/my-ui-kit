@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { getMonthGridData, isSameDay, isDayInRange, isToday } from './utils';
-import { GlassCalendarProps, DateRange } from './types';
+import type { GlassCalendarProps, DateRange } from './types';
 
 /**
  * GlassCalendar Component (Dynamic Header Edition)

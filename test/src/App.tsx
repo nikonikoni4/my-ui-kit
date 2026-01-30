@@ -3,6 +3,7 @@ import { TodoItemTest } from './test_component/TodoItemTest'
 import { TaskCalendarTest } from './test_component/TaskCalendarTest'
 import { TodoItemTreeDetailedTest } from './test_component/TodoItemTreeDetailedTest'
 import GlassCalendarTest from './test_component/GlassCalendarTest'
+import DragDropTodoTest from './test_component/DragDropTodoTest'
 import './App.css'
 
 function App() {
@@ -15,7 +16,7 @@ function App() {
       case 'todoItemTreeDetailed':
         return <TodoItemTreeDetailedTest />
       case 'dragDrop':
-        return <div className="text-center p-8 text-gray-500">DragDrop 测试界面 (待添加)</div>
+        return <DragDropTodoTest />
       case 'milestone':
         return <div className="text-center p-8 text-gray-500">Milestone 测试界面 (待添加)</div>
       case 'taskCalendar':
