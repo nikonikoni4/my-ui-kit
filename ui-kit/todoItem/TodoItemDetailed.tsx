@@ -74,6 +74,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
     const colorPickerRef = useRef<HTMLDivElement>(null);
 
     // Editable fields state
+    const [editScheduledDate, setEditScheduledDate] = useState(todo.scheduledDate || '');
     const [editExpectedDate, setEditExpectedDate] = useState(todo.expectedFinishAt || '');
     const [editActualDate, setEditActualDate] = useState(todo.actualFinishAt || '');
     const [editDelayReason, setEditDelayReason] = useState(todo.delayReason || '');
@@ -129,10 +130,11 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
 
     // Sync form state when todo changes
     useEffect(() => {
+        setEditScheduledDate(todo.scheduledDate || '');
         setEditExpectedDate(todo.expectedFinishAt || '');
         setEditActualDate(todo.actualFinishAt || '');
         setEditDelayReason(todo.delayReason || '');
-    }, [todo.expectedFinishAt, todo.actualFinishAt, todo.delayReason]);
+    }, [todo.scheduledDate, todo.expectedFinishAt, todo.actualFinishAt, todo.delayReason]);
 
     // Handle State Toggling (Checkbox)
     const toggleComplete = (e: React.MouseEvent) => {
@@ -155,6 +157,11 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
     };
 
     // Handle date changes
+    const handleScheduledDateChange = (value: string) => {
+        setEditScheduledDate(value);
+        onUpdate(todo.id, { scheduledDate: value || null });
+    };
+
     const handleExpectedDateChange = (value: string) => {
         setEditExpectedDate(value);
         onUpdate(todo.id, { expectedFinishAt: value || null });
@@ -273,37 +280,72 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
                     {/* Time Info Row - Always Visible */}
                     <div className="flex items-center gap-3 flex-wrap mt-2">
                         {/* Scheduled Date (开始时间) */}
+                        {/* Scheduled Date (开始时间) */}
                         {todo.scheduledDate && (
-                            <div className="flex items-center gap-1.5 text-xs">
+                            <div className="flex items-center gap-1.5 text-xs relative z-30">
                                 <Calendar size={12} className="text-violet-500" />
                                 <span className="text-slate-500">开始:</span>
-                                <span className="font-medium text-violet-600">{formatDate(todo.scheduledDate)}</span>
+                                <input
+                                    type="date"
+                                    value={editScheduledDate}
+                                    onChange={(e) => handleScheduledDateChange(e.target.value)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault(); // Prevent standard behavior to force picker? No, preventDefault stops focus often.
+                                        // Just stop propagation and show picker
+                                        try {
+                                            if (typeof (e.currentTarget as any).showPicker === 'function') {
+                                                (e.currentTarget as any).showPicker();
+                                            }
+                                        } catch (err) {
+                                            // Fallback or ignore
+                                        }
+                                    }}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    className="font-medium text-violet-600 bg-transparent border-none outline-none cursor-pointer text-xs p-0 w-[90px]"
+                                />
                             </div>
                         )}
 
                         {/* Expected Finish Date (预期完成时间) */}
-                        <div className="flex items-center gap-1.5 text-xs">
+                        <div className="flex items-center gap-1.5 text-xs relative z-30">
                             <Timer size={12} className="text-blue-500" />
                             <span className="text-slate-500">预期:</span>
                             <input
                                 type="date"
                                 value={editExpectedDate}
                                 onChange={(e) => handleExpectedDateChange(e.target.value)}
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    try {
+                                        if (typeof (e.currentTarget as any).showPicker === 'function') {
+                                            (e.currentTarget as any).showPicker();
+                                        }
+                                    } catch (err) { }
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
                                 className="font-medium text-blue-600 bg-transparent border-none outline-none cursor-pointer text-xs p-0 w-[90px]"
                             />
                         </div>
 
                         {/* Actual Finish Date - Only show if completed */}
                         {isCompleted && (
-                            <div className="flex items-center gap-1.5 text-xs">
+                            <div className="flex items-center gap-1.5 text-xs relative z-30">
                                 <Check size={12} className="text-emerald-500" />
                                 <span className="text-slate-500">完成:</span>
                                 <input
                                     type="date"
                                     value={editActualDate}
                                     onChange={(e) => handleActualDateChange(e.target.value)}
-                                    onClick={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        try {
+                                            if (typeof (e.currentTarget as any).showPicker === 'function') {
+                                                (e.currentTarget as any).showPicker();
+                                            }
+                                        } catch (err) { }
+                                    }}
+                                    onMouseDown={(e) => e.stopPropagation()}
                                     className="font-medium text-emerald-600 bg-transparent border-none outline-none cursor-pointer text-xs p-0 w-[90px]"
                                 />
                             </div>
