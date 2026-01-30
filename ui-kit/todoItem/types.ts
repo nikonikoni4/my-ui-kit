@@ -4,12 +4,12 @@
  */
 
 export interface TodoItem {
-    // === 基础属性 ===
+    // === 基础属性 === 
     id: number;
     content: string;
-    parentId: number | null;         // 父任务ID（支持无限层级嵌套）
+    parentId: string | null;         // 父任务ID（支持无限层级嵌套）
     goalId: string | null;           // 关联的Goal ID
-    planDocId: number | null;        // 来源计划书ID
+    planDocId: string | null;        // 来源计划书ID
 
     // === 来源追踪（用于MD同步） ===
     sourceType: 'manual' | 'plan_doc';
