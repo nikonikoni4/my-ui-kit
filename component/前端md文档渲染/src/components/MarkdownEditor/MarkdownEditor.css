@@ -1,0 +1,491 @@
+/* ========================================
+   Markdown Editor 样式
+   支持亮色/深色模式
+   ======================================== */
+
+/* CSS 变量定义 */
+.markdown-editor-wrapper {
+    /* 亮色模式变量 */
+    --editor-bg: #ffffff;
+    --editor-bg-secondary: #f8fafc;
+    --editor-text: #1f2937;
+    --editor-text-secondary: #6b7280;
+    --editor-border: #e2e8f0;
+    --editor-accent: #3b82f6;
+    --editor-accent-hover: #2563eb;
+    --editor-code-bg: #1e293b;
+    --editor-code-inline-bg: #f1f5f9;
+    --editor-code-inline-text: #e11d48;
+    --editor-quote-border: #3b82f6;
+    --editor-link: #3b82f6;
+    --editor-table-header-bg: #f8fafc;
+    --editor-shadow: rgba(0, 0, 0, 0.08);
+
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px var(--editor-shadow);
+    background: var(--editor-bg);
+    border: 1px solid var(--editor-border);
+    transition: all 0.3s ease;
+}
+
+/* 深色模式变量 */
+.markdown-editor-wrapper.dark {
+    --editor-bg: #1a1a2e;
+    --editor-bg-secondary: #16213e;
+    --editor-text: #e5e7eb;
+    --editor-text-secondary: #9ca3af;
+    --editor-border: #374151;
+    --editor-accent: #60a5fa;
+    --editor-accent-hover: #93c5fd;
+    --editor-code-bg: #0f0f23;
+    --editor-code-inline-bg: #1f2937;
+    --editor-code-inline-text: #f472b6;
+    --editor-quote-border: #60a5fa;
+    --editor-link: #60a5fa;
+    --editor-table-header-bg: #1f2937;
+    --editor-shadow: rgba(0, 0, 0, 0.4);
+}
+
+/* ========================================
+   工具栏样式
+   ======================================== */
+.markdown-editor-wrapper [class*="_toolbarRoot"] {
+    background: var(--editor-bg-secondary) !important;
+    border-bottom: 1px solid var(--editor-border) !important;
+    padding: 8px 16px !important;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.markdown-editor-wrapper [class*="_toolbarRoot"] button {
+    color: var(--editor-text-secondary);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.markdown-editor-wrapper [class*="_toolbarRoot"] button:hover {
+    background: var(--editor-border);
+    color: var(--editor-text);
+}
+
+.markdown-editor-wrapper [class*="_toolbarRoot"] button[data-state="on"] {
+    background: var(--editor-accent) !important;
+    color: white !important;
+}
+
+/* 下拉选择框样式 */
+.markdown-editor-wrapper [class*="_selectTrigger"],
+.markdown-editor-wrapper select {
+    background: var(--editor-bg) !important;
+    color: var(--editor-text) !important;
+    border: 1px solid var(--editor-border) !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+}
+
+/* 分隔符样式 */
+.markdown-editor-wrapper [class*="_toolbarRoot"] [class*="_separator"] {
+    background: var(--editor-border);
+    margin: 0 8px;
+}
+
+/* ========================================
+   编辑器内容区域样式
+   ======================================== */
+.markdown-editor-wrapper [class*="_rootContentEditableWrapper"] {
+    background: var(--editor-bg);
+}
+
+.markdown-editor-wrapper .md-content {
+    padding: 24px 32px;
+    min-height: var(--md-editor-min-height, 400px);
+    max-height: var(--md-editor-max-height, 700px);
+    overflow-y: auto;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--editor-text);
+    caret-color: var(--editor-accent);
+}
+
+/* 滚动条美化 */
+.markdown-editor-wrapper .md-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-editor-wrapper .md-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.markdown-editor-wrapper .md-content::-webkit-scrollbar-thumb {
+    background: var(--editor-border);
+    border-radius: 4px;
+}
+
+.markdown-editor-wrapper .md-content::-webkit-scrollbar-thumb:hover {
+    background: var(--editor-text-secondary);
+}
+
+/* ========================================
+   标题样式
+   ======================================== */
+.markdown-editor-wrapper .md-content h1 {
+    font-size: 2.25em;
+    font-weight: 800;
+    margin: 1.2em 0 0.6em;
+    padding-bottom: 0.4em;
+    border-bottom: 2px solid var(--editor-border);
+    background: linear-gradient(135deg, var(--editor-accent), #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.markdown-editor-wrapper .md-content h2 {
+    font-size: 1.75em;
+    font-weight: 700;
+    margin: 1em 0 0.5em;
+    color: var(--editor-text);
+    position: relative;
+    padding-left: 16px;
+}
+
+.markdown-editor-wrapper .md-content h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    bottom: 0.1em;
+    width: 4px;
+    background: linear-gradient(180deg, var(--editor-accent), #8b5cf6);
+    border-radius: 2px;
+}
+
+.markdown-editor-wrapper .md-content h3 {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin: 0.8em 0 0.4em;
+    color: var(--editor-text);
+}
+
+.markdown-editor-wrapper .md-content h4 {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin: 0.6em 0 0.3em;
+    color: var(--editor-text-secondary);
+}
+
+.markdown-editor-wrapper .md-content h5,
+.markdown-editor-wrapper .md-content h6 {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin: 0.5em 0 0.25em;
+    color: var(--editor-text-secondary);
+}
+
+/* ========================================
+   段落和文本样式
+   ======================================== */
+.markdown-editor-wrapper .md-content p {
+    margin: 0.8em 0;
+}
+
+.markdown-editor-wrapper .md-content strong {
+    font-weight: 700;
+    color: var(--editor-text);
+}
+
+.markdown-editor-wrapper .md-content em {
+    font-style: italic;
+    color: var(--editor-text-secondary);
+}
+
+.markdown-editor-wrapper .md-content u {
+    text-decoration: underline;
+    text-decoration-color: var(--editor-accent);
+    text-underline-offset: 3px;
+}
+
+/* ========================================
+   代码样式
+   ======================================== */
+/* 行内代码 */
+.markdown-editor-wrapper .md-content :not(pre)>code {
+    background: var(--editor-code-inline-bg);
+    color: var(--editor-code-inline-text);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+/* 代码块 */
+.markdown-editor-wrapper .md-content pre {
+    background: var(--editor-code-bg) !important;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 1.2em 0;
+    overflow-x: auto;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.markdown-editor-wrapper .md-content pre code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: #e5e7eb;
+}
+
+/* ========================================
+   引用块样式
+   ======================================== */
+.markdown-editor-wrapper .md-content blockquote {
+    border-left: 4px solid var(--editor-quote-border);
+    padding: 12px 20px;
+    margin: 1.2em 0;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.08), transparent);
+    border-radius: 0 8px 8px 0;
+    color: var(--editor-text-secondary);
+    font-style: italic;
+}
+
+.markdown-editor-wrapper.dark .md-content blockquote {
+    background: linear-gradient(90deg, rgba(96, 165, 250, 0.1), transparent);
+}
+
+/* ========================================
+   列表样式
+   ======================================== */
+.markdown-editor-wrapper .md-content ul,
+.markdown-editor-wrapper .md-content ol {
+    padding-left: 1.8em;
+    margin: 0.8em 0;
+}
+
+.markdown-editor-wrapper .md-content li {
+    margin: 0.4em 0;
+    padding-left: 0.3em;
+}
+
+.markdown-editor-wrapper .md-content ul>li::marker {
+    color: var(--editor-accent);
+}
+
+.markdown-editor-wrapper .md-content ol>li::marker {
+    color: var(--editor-accent);
+    font-weight: 600;
+}
+
+/* 任务列表 - 修复 MDXEditor 复选框重叠问题 */
+
+/* 覆盖 MDXEditor 的任务列表默认样式 */
+.markdown-editor-wrapper .md-content [class*="_listItemChecked"],
+.markdown-editor-wrapper .md-content [class*="_listItemUnchecked"] {
+    position: relative !important;
+    margin-inline-start: 0 !important; /* 修复负边距导致的重叠 */
+    margin-left: 0 !important;
+    padding-left: 28px !important; /* 为复选框留出固定空间 */
+    list-style-type: none !important;
+}
+
+/* 修复复选框的定位 */
+.markdown-editor-wrapper .md-content [class*="_listItemChecked"]:before,
+.markdown-editor-wrapper .md-content [class*="_listItemUnchecked"]:before {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0.35em !important; /* 垂直居中对齐文本 */
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 4px !important;
+}
+
+/* 未选中的复选框样式 */
+.markdown-editor-wrapper .md-content [class*="_listItemUnchecked"]:before {
+    border: 2px solid var(--editor-border) !important;
+    background: var(--editor-bg) !important;
+}
+
+/* 选中的复选框样式 */
+.markdown-editor-wrapper .md-content [class*="_listItemChecked"]:before {
+    border: 2px solid var(--editor-accent) !important;
+    background: var(--editor-accent) !important;
+}
+
+/* 选中状态的勾选标记 */
+.markdown-editor-wrapper .md-content [class*="_listItemChecked"]:after {
+    position: absolute !important;
+    left: 5px !important;
+    top: 0.35em !important;
+    width: 5px !important;
+    height: 10px !important;
+    border-color: white !important;
+    border-style: solid !important;
+    border-width: 0 2px 2px 0 !important;
+    transform: rotate(45deg) !important;
+}
+
+/* 选中项的文本样式 */
+.markdown-editor-wrapper .md-content [class*="_listItemChecked"] {
+    text-decoration: line-through !important;
+    color: var(--editor-text-secondary) !important;
+}
+
+/* 兼容旧的 data-checked 属性选择器 */
+.markdown-editor-wrapper .md-content li[data-checked="true"] {
+    text-decoration: line-through;
+    color: var(--editor-text-secondary);
+}
+
+/* 如果有内联 checkbox input 元素的兼容样式 */
+.markdown-editor-wrapper .md-content li:has(input[type="checkbox"]) {
+    list-style-type: none !important;
+    padding-left: 28px !important;
+    margin-left: 0 !important;
+    position: relative !important;
+}
+
+.markdown-editor-wrapper .md-content li input[type="checkbox"] {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0.35em !important;
+    margin: 0 !important;
+    cursor: pointer;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* ========================================
+   链接样式
+   ======================================== */
+.markdown-editor-wrapper .md-content a {
+    color: var(--editor-link);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--editor-link);
+    transition: all 0.2s ease;
+}
+
+.markdown-editor-wrapper .md-content a:hover {
+    border-bottom-style: solid;
+    opacity: 0.8;
+}
+
+/* ========================================
+   表格样式
+   ======================================== */
+.markdown-editor-wrapper .md-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2em 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px var(--editor-shadow);
+}
+
+.markdown-editor-wrapper .md-content th,
+.markdown-editor-wrapper .md-content td {
+    border: 1px solid var(--editor-border);
+    padding: 12px 16px;
+    text-align: left;
+}
+
+.markdown-editor-wrapper .md-content th {
+    background: var(--editor-table-header-bg);
+    font-weight: 600;
+    color: var(--editor-text);
+}
+
+.markdown-editor-wrapper .md-content tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.markdown-editor-wrapper.dark .md-content tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ========================================
+   图片样式
+   ======================================== */
+.markdown-editor-wrapper .md-content img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin: 1.2em 0;
+    box-shadow: 0 4px 16px var(--editor-shadow);
+    transition: transform 0.3s ease;
+}
+
+.markdown-editor-wrapper .md-content img:hover {
+    transform: scale(1.02);
+}
+
+/* ========================================
+   分割线样式
+   ======================================== */
+.markdown-editor-wrapper .md-content hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--editor-border), transparent);
+    margin: 2.5em 0;
+}
+
+/* ========================================
+   占位符样式
+   ======================================== */
+.markdown-editor-wrapper [data-placeholder]::before {
+    color: var(--editor-text-secondary) !important;
+    font-style: italic;
+    opacity: 0.6;
+}
+
+/* ========================================
+   对话框样式覆盖
+   ======================================== */
+.markdown-editor-wrapper [class*="_dialogContent"] {
+    background: var(--editor-bg) !important;
+    border: 1px solid var(--editor-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px var(--editor-shadow) !important;
+}
+
+.markdown-editor-wrapper [class*="_dialogContent"] input {
+    background: var(--editor-bg-secondary) !important;
+    border: 1px solid var(--editor-border) !important;
+    color: var(--editor-text) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+}
+
+.markdown-editor-wrapper [class*="_dialogContent"] button {
+    background: var(--editor-accent) !important;
+    color: white !important;
+    border-radius: 8px !important;
+    border: none !important;
+}
+
+/* ========================================
+   焦点状态
+   ======================================== */
+.markdown-editor-wrapper:focus-within {
+    box-shadow: 0 4px 20px var(--editor-shadow), 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* ========================================
+   动画效果
+   ======================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.markdown-editor-wrapper {
+    animation: fadeIn 0.4s ease-out;
+}
