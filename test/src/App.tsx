@@ -5,10 +5,11 @@ import { TodoItemTreeDetailedTest } from './test_component/TodoItemTreeDetailedT
 import GlassCalendarTest from './test_component/GlassCalendarTest'
 import DragDropTodoTest from './test_component/DragDropTodoTest'
 import DragDropTestPage from './test_component/DragDropTestPage'
+import MarkdownEditorTest from './test_component/MarkdownEditorTest'
 import './App.css'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('todoItem')
+  const [activeTab, setActiveTab] = useState('markdownEditor')
 
   const renderContent = () => {
     switch (activeTab) {
@@ -26,12 +27,15 @@ function App() {
         return <TaskCalendarTest />
       case 'glassCalendar':
         return <GlassCalendarTest />
+      case 'markdownEditor':
+        return <MarkdownEditorTest />
       default:
         return <div className="text-center p-8 text-gray-500">请选择一个组件进行测试</div>
     }
   }
 
   const tabs = [
+    { id: 'markdownEditor', label: 'MarkdownEditor' },
     { id: 'todoItem', label: 'TodoItem' },
     { id: 'todoItemTreeDetailed', label: 'TodoItem Tree Detailed' },
     { id: 'dragDrop', label: 'DragDrop' },
