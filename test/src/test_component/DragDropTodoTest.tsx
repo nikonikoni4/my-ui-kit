@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import CrossAreaDndProvider from '../../../ui-kit/dragDrop/context/CrossAreaDndContext';
@@ -141,8 +141,7 @@ export default function DragDropTodoTest() {
 
     const handleCrossAreaDrop = (
         dragItem: DragItemData<TodoItemType>,
-        dropArea: DropAreaData,
-        event: any
+        dropArea: DropAreaData
     ) => {
         console.log('Cross Area Drop:', dragItem, '->', dropArea);
         const itemId = dragItem.id as number;

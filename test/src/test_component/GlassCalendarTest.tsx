@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { GlassCalendar } from '../../../ui-kit/calendar';
 
 export default function GlassCalendarTest() {

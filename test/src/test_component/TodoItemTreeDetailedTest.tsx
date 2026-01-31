@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TodoItemTreeDetailed, TodoItem } from '@my-ui-kit/core';
+import { TodoItemTreeDetailed, type TodoItem } from '@my-ui-kit/core';
 
 const INITIAL_ITEMS: TodoItem[] = [
     {

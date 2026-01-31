@@ -4,6 +4,7 @@ import { TaskCalendarTest } from './test_component/TaskCalendarTest'
 import { TodoItemTreeDetailedTest } from './test_component/TodoItemTreeDetailedTest'
 import GlassCalendarTest from './test_component/GlassCalendarTest'
 import DragDropTodoTest from './test_component/DragDropTodoTest'
+import DragDropTestPage from './test_component/DragDropTestPage'
 import './App.css'
 
 function App() {
@@ -17,6 +18,8 @@ function App() {
         return <TodoItemTreeDetailedTest />
       case 'dragDrop':
         return <DragDropTodoTest />
+      case 'integrated':
+        return <DragDropTestPage />
       case 'milestone':
         return <div className="text-center p-8 text-gray-500">Milestone 测试界面 (待添加)</div>
       case 'taskCalendar':
@@ -32,6 +35,7 @@ function App() {
     { id: 'todoItem', label: 'TodoItem' },
     { id: 'todoItemTreeDetailed', label: 'TodoItem Tree Detailed' },
     { id: 'dragDrop', label: 'DragDrop' },
+    { id: 'integrated', label: 'Comp. Lab' },
     { id: 'milestone', label: 'Milestone' },
     { id: 'taskCalendar', label: 'TaskCalendar' },
     { id: 'glassCalendar', label: 'Glass Calendar' },

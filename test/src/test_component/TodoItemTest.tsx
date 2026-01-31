@@ -16,7 +16,7 @@ export function TodoItemTest() {
             <h2 className="text-xl font-semibold mb-4 text-slate-800">TodoItem 组件演示</h2>
             <TodoItem
                 todo={todo as any}
-                onUpdate={(id, updates) => {
+                onUpdate={(_id, updates) => {
                     console.log('Update:', updates);
                     setTodo(prev => ({ ...prev, ...updates }));
                 }}

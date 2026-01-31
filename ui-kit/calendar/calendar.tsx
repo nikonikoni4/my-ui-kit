@@ -217,6 +217,14 @@ const GlassCalendar: React.FC<GlassCalendarProps> = ({
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
+            {/* 浅灰色渐变背景层 - 让玻璃效果更明显 */}
+            <div
+                className="absolute inset-0 -z-20 rounded-[2rem]"
+                style={{
+                    background: 'linear-gradient(135deg, #e2e8f0 0%, #f1f5f9 25%, #e2e8f0 50%, #f8fafc 75%, #e2e8f0 100%)',
+                }}
+            />
+
             {/* 物理光泽层 */}
             <div className="absolute top-0 right-0 w-[80%] h-full bg-gradient-to-l from-indigo-100/10 to-transparent pointer-events-none z-0" />
             <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-indigo-100/10 to-transparent pointer-events-none z-0" />
