@@ -238,6 +238,14 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
             margin: 0.5em 0;
           }
 
+          .markdown-editor .ProseMirror ul:not([data-type="taskList"]) {
+            list-style-type: disc;
+          }
+
+          .markdown-editor .ProseMirror ol {
+            list-style-type: decimal;
+          }
+
           .markdown-editor .ProseMirror li {
             margin: 0.25em 0;
           }
