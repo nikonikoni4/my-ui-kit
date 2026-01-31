@@ -255,11 +255,17 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
 
           .markdown-editor .ProseMirror ul[data-type="taskList"] li > label {
             flex-shrink: 0;
-            margin-top: 0.25em;
+            display: flex;
+            align-items: center;
+            height: 1.5em;
           }
 
           .markdown-editor .ProseMirror ul[data-type="taskList"] li > div {
             flex: 1;
+          }
+
+          .markdown-editor .ProseMirror ul[data-type="taskList"] li > div p {
+            margin: 0;
           }
 
           .markdown-editor .ProseMirror ul[data-type="taskList"] input[type="checkbox"] {
@@ -267,6 +273,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
             height: 1em;
             cursor: pointer;
             accent-color: #6366f1;
+            margin-top: 0.15em;
           }
 
           .markdown-editor .ProseMirror blockquote {
