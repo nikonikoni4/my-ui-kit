@@ -14,74 +14,41 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { TodoItem as TodoItemType } from './types';
+import { BaseTodoItem, TodoItemTreeDetailedProps } from './types';
 import { TodoItemDetailed } from './TodoItemDetailed';
-
-// ============================================================================
-// Types
-// ============================================================================
-
-interface TodoItemTreeDetailedProps {
-    /** 树形结构的 TodoItem 数组（已构建好 children） */
-    items: TodoItemType[];
-    /** 当前层级（内部递归使用，外部调用时无需传入） */
-    level?: number;
-    /** 最大缩进层级（超过此层级不再增加缩进） */
-    maxIndentLevel?: number;
-    /** 是否支持折叠 */
-    collapsible?: boolean;
-    /** 初始展开的节点 ID 集合 */
-    defaultExpandedIds?: Set<number>;
-    /** 是否启用拖拽排序 */
-    sortable?: boolean;
-    /** 选中的任务 ID */
-    selectedId?: number | null;
-    /** 更新任务回调 */
-    onUpdate: (id: number, updates: Partial<TodoItemType>) => void;
-    /** 删除任务回调 */
-    onDelete: (id: number) => void;
-    /** 选择任务回调 */
-    onSelect?: (id: number) => void;
-    /** 拖拽结束回调 */
-    onDragEnd?: (event: DragEndEvent) => void;
-    /** 展开/折叠变化回调 */
-    onExpandChange?: (id: number, expanded: boolean) => void;
-    /** 是否显示来源标签 */
-    showSource?: boolean;
-    /** 是否显示日期标签 */
-    showDate?: boolean;
-    /** 添加子项回调 */
-    onAddChild?: (parentId: number) => void;
-    /** 根据 goalId 获取 Goal 名称 */
-    getGoalName?: (goalId: string | null) => string | undefined;
-    /** 根据 planDocId 获取 Plan 名称 */
-    getPlanName?: (planDocId: string | null) => string | undefined;
-}
-
-interface TodoItemNodeProps {
-    item: TodoItemType;
-    level: number;
-    maxIndentLevel: number;
-    collapsible: boolean;
-    isExpanded: boolean;
-    selectedId?: number | null;
-    onToggleExpand: (id: number) => void;
-    onUpdate: (id: number, updates: Partial<TodoItemType>) => void;
-    onDelete: (id: number) => void;
-    onSelect?: (id: number) => void;
-    showSource?: boolean;
-    showDate?: boolean;
-    renderChildren: () => React.ReactNode;
-    onAddChild?: (parentId: number) => void;
-    goalName?: string;
-    planName?: string;
-}
 
 // ============================================================================
 // Constants
 // ============================================================================
 
 const INDENT_PX = 28; // 每层缩进像素
+
+// ============================================================================
+// Internal Types
+// ============================================================================
+
+interface TodoItemNodeDetailedProps<T extends BaseTodoItem> {
+    item: T;
+    level: number;
+    maxIndentLevel: number;
+    collapsible: boolean;
+    isExpanded: boolean;
+    selectedId?: number | string | null;
+    onToggleExpand: (id: T['id']) => void;
+    onUpdate?: (id: T['id'], updates: Partial<T>) => void;
+    onDelete?: (id: T['id']) => void;
+    onSelect?: (id: T['id']) => void;
+    showSource?: boolean;
+    showDate?: boolean;
+    renderTag?: (item: T) => React.ReactNode;
+    renderExtra?: (item: T) => React.ReactNode;
+    renderActions?: (item: T) => React.ReactNode;
+    renderTimeInfo?: (item: T) => React.ReactNode;
+    renderChildren: () => React.ReactNode;
+    onAddChild?: (parentId: T['id']) => void;
+    goalName?: string;
+    planName?: string;
+}
 
 // ============================================================================
 // Sub Components
@@ -91,7 +58,7 @@ const INDENT_PX = 28; // 每层缩进像素
  * 单个树节点（包含展开/折叠按钮和子节点渲染）
  * 使用 TodoItemDetailed 组件渲染详细版本
  */
-const TodoItemNodeDetailed: React.FC<TodoItemNodeProps> = ({
+function TodoItemNodeDetailed<T extends BaseTodoItem>({
     item,
     level,
     maxIndentLevel,
@@ -104,11 +71,15 @@ const TodoItemNodeDetailed: React.FC<TodoItemNodeProps> = ({
     onSelect,
     showSource,
     showDate,
+    renderTag,
+    renderExtra,
+    renderActions,
+    renderTimeInfo,
     renderChildren,
     onAddChild,
     goalName,
     planName,
-}) => {
+}: TodoItemNodeDetailedProps<T>) {
     const hasChildren = item.children && item.children.length > 0;
     const indent = Math.min(level, maxIndentLevel) * INDENT_PX;
 
@@ -148,8 +119,8 @@ const TodoItemNodeDetailed: React.FC<TodoItemNodeProps> = ({
 
                 {/* TodoItemDetailed 组件 */}
                 <div className="flex-1 min-w-0">
-                    <TodoItemDetailed
-                        todo={item}
+                    <TodoItemDetailed<T>
+                        item={item}
                         isActive={selectedId === item.id}
                         onUpdate={onUpdate}
                         onDelete={onDelete}
@@ -159,6 +130,10 @@ const TodoItemNodeDetailed: React.FC<TodoItemNodeProps> = ({
                         onAddChild={onAddChild}
                         goalName={goalName}
                         planName={planName}
+                        renderTag={renderTag}
+                        renderExtra={renderExtra}
+                        renderActions={renderActions}
+                        renderTimeInfo={renderTimeInfo}
                     />
                 </div>
             </div>
@@ -171,14 +146,14 @@ const TodoItemNodeDetailed: React.FC<TodoItemNodeProps> = ({
             )}
         </div>
     );
-};
+}
 
 // ============================================================================
 // Main Component
 // ============================================================================
 
 /**
- * TodoItemTreeDetailed - 递归渲染层级结构的容器组件（详细版本）
+ * TodoItemTreeDetailed - 递归渲染层级结构的容器组件（详细版本，泛型）
  *
  * 专门用于每日聚焦页面，使用 TodoItemDetailed 组件渲染每个节点
  * 直接展示时间信息（开始时间、预期完成、拖延状态等）
@@ -189,8 +164,9 @@ const TodoItemNodeDetailed: React.FC<TodoItemNodeProps> = ({
  * - 可选的拖拽排序
  * - 连接线视觉效果
  * - 详细时间信息展示
+ * - Render Props 插槽
  */
-export const TodoItemTreeDetailed: React.FC<TodoItemTreeDetailedProps> = ({
+export function TodoItemTreeDetailed<T extends BaseTodoItem = BaseTodoItem>({
     items,
     level = 0,
     maxIndentLevel = 5,
@@ -208,9 +184,13 @@ export const TodoItemTreeDetailed: React.FC<TodoItemTreeDetailedProps> = ({
     onAddChild,
     getGoalName,
     getPlanName,
-}) => {
+    renderTag,
+    renderExtra,
+    renderActions,
+    renderTimeInfo,
+}: TodoItemTreeDetailedProps<T>) {
     // 展开状态管理
-    const [expandedIds, setExpandedIds] = useState<Set<number>>(() => {
+    const [expandedIds, setExpandedIds] = useState<Set<number | string>>(() => {
         return defaultExpandedIds || new Set();
     });
 
@@ -221,7 +201,7 @@ export const TodoItemTreeDetailed: React.FC<TodoItemTreeDetailedProps> = ({
         }
     }, [defaultExpandedIds]);
 
-    const toggleExpand = useCallback((id: number) => {
+    const toggleExpand = useCallback((id: T['id']) => {
         setExpandedIds(prev => {
             const next = new Set(prev);
             const willExpand = !next.has(id);
@@ -248,32 +228,43 @@ export const TodoItemTreeDetailed: React.FC<TodoItemTreeDetailedProps> = ({
     );
 
     // 递归渲染子节点
-    const renderItems = (itemList: TodoItemType[], currentLevel: number) => {
-        return itemList.map(item => (
-            <TodoItemNodeDetailed
-                key={item.id}
-                item={item}
-                level={currentLevel}
-                maxIndentLevel={maxIndentLevel}
-                collapsible={collapsible}
-                isExpanded={expandedIds.has(item.id)}
-                selectedId={selectedId}
-                onToggleExpand={toggleExpand}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
-                onSelect={onSelect}
-                showSource={showSource}
-                showDate={showDate}
-                onAddChild={onAddChild}
-                goalName={getGoalName?.(item.goalId)}
-                planName={getPlanName?.(item.planDocId)}
-                renderChildren={() =>
-                    item.children && item.children.length > 0
-                        ? renderItems(item.children, currentLevel + 1)
-                        : null
-                }
-            />
-        ));
+    const renderItems = (itemList: T[], currentLevel: number) => {
+        return itemList.map(item => {
+            // Type-safe access to optional properties for goal/plan names
+            const itemAny = item as any;
+            const goalId = itemAny.goalId as string | null | undefined;
+            const planDocId = itemAny.planDocId as string | null | undefined;
+
+            return (
+                <TodoItemNodeDetailed<T>
+                    key={item.id}
+                    item={item}
+                    level={currentLevel}
+                    maxIndentLevel={maxIndentLevel}
+                    collapsible={collapsible}
+                    isExpanded={expandedIds.has(item.id)}
+                    selectedId={selectedId}
+                    onToggleExpand={toggleExpand}
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                    onSelect={onSelect}
+                    showSource={showSource}
+                    showDate={showDate}
+                    onAddChild={onAddChild}
+                    goalName={getGoalName?.(goalId ?? null)}
+                    planName={getPlanName?.(planDocId ?? null)}
+                    renderTag={renderTag}
+                    renderExtra={renderExtra}
+                    renderActions={renderActions}
+                    renderTimeInfo={renderTimeInfo}
+                    renderChildren={() =>
+                        item.children && item.children.length > 0
+                            ? renderItems(item.children as T[], currentLevel + 1)
+                            : null
+                    }
+                />
+            );
+        });
     };
 
     // 如果启用排序，包裹 DndContext
@@ -303,4 +294,4 @@ export const TodoItemTreeDetailed: React.FC<TodoItemTreeDetailedProps> = ({
             {renderItems(items, level)}
         </div>
     );
-};
+}

@@ -11,13 +11,13 @@ import {
 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { TodoItem as TodoItemType } from './types';
+import { BaseTodoItem, TodoItemProps } from './types';
 
 // State color mappings based on Aurora Design
-const STATE_COLORS = {
-    pool: 'bg-indigo-500',      // #6366F1
-    scheduled: 'bg-violet-500', // #8B5CF6
-    completed: 'bg-emerald-500',// #10B981
+const STATE_COLORS: Record<string, string> = {
+    pool: 'bg-indigo-500',
+    scheduled: 'bg-violet-500',
+    completed: 'bg-emerald-500',
     shelved: 'bg-gray-400'
 };
 
@@ -35,51 +35,45 @@ const TODO_COLORS = [
 // Get random color from TODO_COLORS
 const getRandomColor = () => TODO_COLORS[Math.floor(Math.random() * TODO_COLORS.length)];
 
-interface TodoItemProps {
-    todo: TodoItemType;
-    isActive?: boolean;
-    onUpdate: (id: number, updates: Partial<TodoItemType>) => void;
-    onSelect?: (id: number) => void;
-    onDelete: (id: number) => void;
-
-    // Optional display flags
-    showSource?: boolean;
-    showDate?: boolean;
-    /** 是否显示编辑按钮（用于每日聚焦页面，编辑日期和拖延原因） */
-    showEditButton?: boolean;
-
-    // 跨区域拖拽所需的元数据
-    /** 拖拽项类型，用于跨区域拖拽识别，如 'task' */
-    dragType?: string;
-    /** 拖拽来源，用于跨区域拖拽识别，如 'task-pool', 'calendar' */
-    dragSource?: string;
-
-    /** 禁用内部的 sortable 功能（当外层已经用 DraggableItem 包裹时使用） */
-    disableSortable?: boolean;
-}
-
-export const TodoItem: React.FC<TodoItemProps> = ({
-    todo,
+/**
+ * TodoItem - 泛型任务项组件
+ * 支持 render props 插槽用于自定义渲染
+ */
+export function TodoItem<T extends BaseTodoItem = BaseTodoItem>({
+    item,
     isActive,
     onUpdate,
     onSelect,
     onDelete,
+    renderTag,
+    renderExtra,
+    renderActions,
     showSource = true,
     showDate = true,
     showEditButton = false,
     dragType,
     dragSource,
     disableSortable = false,
-}) => {
+    className,
+}: TodoItemProps<T>) {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [showDetailEditor, setShowDetailEditor] = useState(false);
     const colorPickerRef = useRef<HTMLDivElement>(null);
     const detailEditorRef = useRef<HTMLDivElement>(null);
 
+    // Type-safe access to optional properties
+    const itemAny = item as any;
+    const scheduledDate = itemAny.scheduledDate as string | null | undefined;
+    const sourceType = itemAny.sourceType as string | undefined;
+    const expectedFinishAt = itemAny.expectedFinishAt as string | null | undefined;
+    const actualFinishAt = itemAny.actualFinishAt as string | null | undefined;
+    const delayReason = itemAny.delayReason as string | null | undefined;
+    const delayDays = itemAny.delayDays as number | null | undefined;
+
     // Detail editor form state
-    const [editExpectedDate, setEditExpectedDate] = useState(todo.expectedFinishAt || '');
-    const [editActualDate, setEditActualDate] = useState(todo.actualFinishAt || '');
-    const [editDelayReason, setEditDelayReason] = useState(todo.delayReason || '');
+    const [editExpectedDate, setEditExpectedDate] = useState(expectedFinishAt || '');
+    const [editActualDate, setEditActualDate] = useState(actualFinishAt || '');
+    const [editDelayReason, setEditDelayReason] = useState(delayReason || '');
 
     const {
         attributes,
@@ -89,14 +83,12 @@ export const TodoItem: React.FC<TodoItemProps> = ({
         transition,
         isDragging,
     } = useSortable({
-        id: todo.id,
-        // 禁用 sortable 功能（当外层已经用 DraggableItem 包裹时）
+        id: item.id,
         disabled: disableSortable,
-        // 传递拖拽元数据，使 CrossAreaDndProvider 能够识别拖拽项
         data: dragType || dragSource ? {
             type: dragType,
             source: dragSource,
-            payload: todo,
+            payload: item,
         } : undefined,
     });
 
@@ -106,7 +98,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
         opacity: isDragging ? 0.6 : 1,
         zIndex: isDragging ? 50 : 'auto',
         position: 'relative',
-        backgroundColor: todo.color || '#FFFFFF',
+        backgroundColor: item.color || '#FFFFFF',
     };
 
     // Auto-resize for textarea
@@ -116,7 +108,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
             textareaRef.current.style.height = 'auto';
             textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
         }
-    }, [todo.content]);
+    }, [item.content]);
 
     // Close dropdowns when clicking outside
     useEffect(() => {
@@ -134,31 +126,32 @@ export const TodoItem: React.FC<TodoItemProps> = ({
         }
     }, [showColorPicker, showDetailEditor]);
 
-    // Sync form state when todo changes
+    // Sync form state when item changes
     useEffect(() => {
-        setEditExpectedDate(todo.expectedFinishAt || '');
-        setEditActualDate(todo.actualFinishAt || '');
-        setEditDelayReason(todo.delayReason || '');
-    }, [todo.expectedFinishAt, todo.actualFinishAt, todo.delayReason]);
+        setEditExpectedDate(expectedFinishAt || '');
+        setEditActualDate(actualFinishAt || '');
+        setEditDelayReason(delayReason || '');
+    }, [expectedFinishAt, actualFinishAt, delayReason]);
 
     // Handle State Toggling (Checkbox)
     const toggleComplete = (e: React.MouseEvent) => {
         e.stopPropagation();
-        // Cycle: completed -> previous state (default to pool or scheduled) -> completed
-        if (todo.state === 'completed') {
-            const restoreState = todo.scheduledDate ? 'scheduled' : 'pool';
-            onUpdate(todo.id, { state: restoreState });
+        if (!onUpdate) return;
+
+        if (item.state === 'completed') {
+            const restoreState = scheduledDate ? 'scheduled' : 'pool';
+            onUpdate(item.id, { state: restoreState } as Partial<T>);
         } else {
-            onUpdate(todo.id, {
+            onUpdate(item.id, {
                 state: 'completed',
-                actualFinishAt: new Date().toISOString().split('T')[0] // Record finish date
-            });
+                actualFinishAt: new Date().toISOString().split('T')[0]
+            } as unknown as Partial<T>);
         }
     };
 
     // Handle color selection
     const handleColorSelect = (color: string) => {
-        onUpdate(todo.id, { color });
+        onUpdate?.(item.id, { color } as Partial<T>);
         setShowColorPicker(false);
     };
 
@@ -169,21 +162,21 @@ export const TodoItem: React.FC<TodoItemProps> = ({
     };
 
     const handleDetailSave = () => {
-        onUpdate(todo.id, {
+        onUpdate?.(item.id, {
             expectedFinishAt: editExpectedDate || null,
             actualFinishAt: editActualDate || null,
             delayReason: editDelayReason || null
-        });
+        } as unknown as Partial<T>);
         setShowDetailEditor(false);
     };
 
-    const isCompleted = todo.state === 'completed';
+    const isCompleted = item.state === 'completed';
 
     return (
         <div
             ref={setNodeRef}
             style={style}
-            onClick={() => onSelect && onSelect(todo.id)}
+            onClick={() => onSelect?.(item.id)}
             className={`
                 group relative flex items-start gap-3 py-3 pr-3 pl-10 rounded-2xl border transition-all duration-200 mb-2 cursor-pointer
                 ${isActive
@@ -192,6 +185,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
                 }
                 ${isDragging ? 'shadow-xl' : ''}
                 ${isCompleted ? 'opacity-60' : ''}
+                ${className || ''}
             `}
         >
             {/* Drag Handle - Floating on left */}
@@ -202,7 +196,6 @@ export const TodoItem: React.FC<TodoItemProps> = ({
                 className="absolute left-1 top-1 p-2 px-2.5 text-slate-300 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing hover:text-slate-600 hover:bg-slate-200/50 rounded-xl transition-all z-20 flex items-center justify-center mt-0.5"
             >
                 <GripVertical size={18} />
-
             </div>
 
             {/* Checkbox */}
@@ -218,14 +211,15 @@ export const TodoItem: React.FC<TodoItemProps> = ({
             >
                 {isCompleted && <Check size={12} className="text-white" strokeWidth={3} />}
             </button>
+
             {/* Content & Metadata */}
             <div className="flex-1 min-w-0">
                 {/* 直接可编辑的内容 */}
                 <textarea
                     ref={textareaRef}
-                    value={todo.content}
+                    value={item.content}
                     rows={1}
-                    onChange={(e) => onUpdate(todo.id, { content: e.target.value })}
+                    onChange={(e) => onUpdate?.(item.id, { content: e.target.value } as Partial<T>)}
                     onClick={(e) => e.stopPropagation()}
                     className={`
                         w-full bg-transparent border-none outline-none text-sm font-medium p-0 resize-none overflow-hidden
@@ -234,41 +228,49 @@ export const TodoItem: React.FC<TodoItemProps> = ({
                     style={{ minHeight: '20px' }}
                     placeholder="Type a task..."
                 />
+
                 {/* Metadata Tags */}
-                {(showSource || showDate || todo.sourceType === 'plan_doc') && (
-                    <div className="flex items-center gap-2 flex-wrap mt-1.5">
-                        {/* Source Pill */}
-                        {todo.sourceType === 'plan_doc' && showSource && (
-                            <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold border border-blue-100">
-                                <FileText size={10} />
-                                <span>Plan</span>
-                            </div>
-                        )}
+                <div className="flex items-center gap-2 flex-wrap mt-1.5">
+                    {/* Render Props: Custom Tags */}
+                    {renderTag?.(item)}
 
-                        {/* Date Pill */}
-                        {todo.scheduledDate && showDate && (
-                            <div className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold border ${todo.state === 'scheduled'
-                                ? 'bg-violet-50 text-violet-600 border-violet-100'
-                                : 'bg-slate-50 text-slate-500 border-slate-100'
-                                }`}>
-                                <Calendar size={10} />
-                                <span>{todo.scheduledDate}</span>
-                            </div>
-                        )}
+                    {/* Source Pill */}
+                    {sourceType === 'plan_doc' && showSource && (
+                        <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold border border-blue-100">
+                            <FileText size={10} />
+                            <span>Plan</span>
+                        </div>
+                    )}
 
-                        {/* Delay Indicator */}
-                        {todo.delayDays && todo.delayDays > 0 && (
-                            <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold bg-red-50 text-red-500 border border-red-100">
-                                <Clock size={10} />
-                                <span>+{todo.delayDays}d</span>
-                            </div>
-                        )}
-                    </div>
-                )}
+                    {/* Date Pill */}
+                    {scheduledDate && showDate && (
+                        <div className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold border ${item.state === 'scheduled'
+                            ? 'bg-violet-50 text-violet-600 border-violet-100'
+                            : 'bg-slate-50 text-slate-500 border-slate-100'
+                            }`}>
+                            <Calendar size={10} />
+                            <span>{scheduledDate}</span>
+                        </div>
+                    )}
+
+                    {/* Delay Indicator */}
+                    {delayDays && delayDays > 0 && (
+                        <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold bg-red-50 text-red-500 border border-red-100">
+                            <Clock size={10} />
+                            <span>+{delayDays}d</span>
+                        </div>
+                    )}
+
+                    {/* Render Props: Extra Content */}
+                    {renderExtra?.(item)}
+                </div>
             </div>
 
             {/* Hover Actions: Edit, Color, Delete */}
             <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                {/* Render Props: Custom Actions */}
+                {renderActions?.(item)}
+
                 {/* Edit Button - 仅在每日聚焦等页面显示 */}
                 {showEditButton && (
                     <div className="relative" ref={detailEditorRef}>
@@ -363,7 +365,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
                                     onClick={() => handleColorSelect(color)}
                                     className={`
                                         w-5 h-5 rounded-full border border-slate-200 shadow-sm transition-transform hover:scale-110
-                                        ${todo.color === color ? 'ring-2 ring-slate-400 scale-110' : ''}
+                                        ${item.color === color ? 'ring-2 ring-slate-400 scale-110' : ''}
                                     `}
                                     style={{ backgroundColor: color }}
                                 />
@@ -376,7 +378,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
-                        onDelete(todo.id);
+                        onDelete?.(item.id);
                     }}
                     className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                     title="删除任务"
@@ -386,7 +388,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
             </div>
         </div>
     );
-};
+}
 
 // Export TODO_COLORS and getRandomColor for external use
 export { TODO_COLORS, getRandomColor };

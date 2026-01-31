@@ -17,15 +17,7 @@ import {
 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { TodoItem as TodoItemType } from './types';
-
-// State color mappings based on Aurora Design
-const STATE_COLORS = {
-    pool: 'bg-indigo-500',      // #6366F1
-    scheduled: 'bg-violet-500', // #8B5CF6
-    completed: 'bg-emerald-500',// #10B981
-    shelved: 'bg-gray-400'
-};
+import { BaseTodoItem, TodoItemDetailedProps } from './types';
 
 // Available todo background colors
 const TODO_COLORS = [
@@ -41,53 +33,46 @@ const TODO_COLORS = [
 // Get random color from TODO_COLORS
 const getRandomColor = () => TODO_COLORS[Math.floor(Math.random() * TODO_COLORS.length)];
 
-interface TodoItemDetailedProps {
-    todo: TodoItemType;
-    isActive?: boolean;
-    onUpdate: (id: number, updates: Partial<TodoItemType>) => void;
-    onSelect?: (id: number) => void;
-    onDelete: (id: number) => void;
-    onAddChild?: (parentId: number) => void;
-
-    // Optional display data
-    goalName?: string;
-    planName?: string;
-
-    // Optional display flags
-    showSource?: boolean;
-    showDate?: boolean;
-}
-
 /**
- * TodoItemDetailed - 详细版本的 TodoItem 组件
- * 用于每日聚焦页面，展示更多时间相关信息：
- * - 开始时间 (scheduledDate)
- * - 预期完成时间 (expectedFinishAt)
- * - 拖延时间 (delayDays)
- * - 拖延原因 (delayReason)
+ * TodoItemDetailed - 详细版本的 TodoItem 组件（泛型版本）
+ * 用于每日聚焦页面，展示更多时间相关信息
  */
-export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
-    todo,
+export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
+    item,
     isActive,
     onUpdate,
     onSelect,
     onDelete,
     onAddChild,
+    renderTag,
+    renderExtra,
+    renderActions,
+    renderTimeInfo,
     goalName,
     planName,
     showSource = true,
-    showDate = true
-}) => {
+    showDate = true,
+    className,
+}: TodoItemDetailedProps<T>) {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isEditingReason, setIsEditingReason] = useState(false);
     const colorPickerRef = useRef<HTMLDivElement>(null);
 
+    // Type-safe access to optional properties
+    const itemAny = item as any;
+    const scheduledDate = itemAny.scheduledDate as string | null | undefined;
+    const sourceType = itemAny.sourceType as string | undefined;
+    const expectedFinishAt = itemAny.expectedFinishAt as string | null | undefined;
+    const actualFinishAt = itemAny.actualFinishAt as string | null | undefined;
+    const delayReason = itemAny.delayReason as string | null | undefined;
+    const delayDays = itemAny.delayDays as number | null | undefined;
+
     // Editable fields state
-    const [editScheduledDate, setEditScheduledDate] = useState(todo.scheduledDate || '');
-    const [editExpectedDate, setEditExpectedDate] = useState(todo.expectedFinishAt || '');
-    const [editActualDate, setEditActualDate] = useState(todo.actualFinishAt || '');
-    const [editDelayReason, setEditDelayReason] = useState(todo.delayReason || '');
+    const [editScheduledDate, setEditScheduledDate] = useState(scheduledDate || '');
+    const [editExpectedDate, setEditExpectedDate] = useState(expectedFinishAt || '');
+    const [editActualDate, setEditActualDate] = useState(actualFinishAt || '');
+    const [editDelayReason, setEditDelayReason] = useState(delayReason || '');
 
     const {
         attributes,
@@ -96,7 +81,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: todo.id });
+    } = useSortable({ id: item.id });
 
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
@@ -104,7 +89,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
         opacity: isDragging ? 0.6 : 1,
         zIndex: isDragging ? 50 : 'auto',
         position: 'relative',
-        backgroundColor: todo.color || '#FFFFFF',
+        backgroundColor: item.color || '#FFFFFF',
     };
 
     // Auto-resize for textarea
@@ -116,7 +101,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
             textareaRef.current.style.height = 'auto';
             textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
         }
-    }, [todo.content]);
+    }, [item.content]);
 
     useEffect(() => {
         if (reasonTextareaRef.current) {
@@ -138,67 +123,69 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
         }
     }, [showColorPicker]);
 
-    // Sync form state when todo changes
+    // Sync form state when item changes
     useEffect(() => {
-        setEditScheduledDate(todo.scheduledDate || '');
-        setEditExpectedDate(todo.expectedFinishAt || '');
-        setEditActualDate(todo.actualFinishAt || '');
-        setEditDelayReason(todo.delayReason || '');
-    }, [todo.scheduledDate, todo.expectedFinishAt, todo.actualFinishAt, todo.delayReason]);
+        setEditScheduledDate(scheduledDate || '');
+        setEditExpectedDate(expectedFinishAt || '');
+        setEditActualDate(actualFinishAt || '');
+        setEditDelayReason(delayReason || '');
+    }, [scheduledDate, expectedFinishAt, actualFinishAt, delayReason]);
 
     // Handle State Toggling (Checkbox)
     const toggleComplete = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (todo.state === 'completed') {
-            const restoreState = todo.scheduledDate ? 'scheduled' : 'pool';
-            onUpdate(todo.id, { state: restoreState });
+        if (!onUpdate) return;
+
+        if (item.state === 'completed') {
+            const restoreState = scheduledDate ? 'scheduled' : 'pool';
+            onUpdate(item.id, { state: restoreState } as unknown as Partial<T>);
         } else {
-            onUpdate(todo.id, {
+            onUpdate(item.id, {
                 state: 'completed',
                 actualFinishAt: new Date().toISOString().split('T')[0]
-            });
+            } as unknown as Partial<T>);
         }
     };
 
     // Handle color selection
     const handleColorSelect = (color: string) => {
-        onUpdate(todo.id, { color });
+        onUpdate?.(item.id, { color } as unknown as Partial<T>);
         setShowColorPicker(false);
     };
 
     // Handle date changes
     const handleScheduledDateChange = (value: string) => {
         setEditScheduledDate(value);
-        onUpdate(todo.id, { scheduledDate: value || null });
+        onUpdate?.(item.id, { scheduledDate: value || null } as unknown as Partial<T>);
     };
 
     const handleExpectedDateChange = (value: string) => {
         setEditExpectedDate(value);
-        onUpdate(todo.id, { expectedFinishAt: value || null });
+        onUpdate?.(item.id, { expectedFinishAt: value || null } as unknown as Partial<T>);
     };
 
     const handleActualDateChange = (value: string) => {
         setEditActualDate(value);
-        onUpdate(todo.id, { actualFinishAt: value || null });
+        onUpdate?.(item.id, { actualFinishAt: value || null } as unknown as Partial<T>);
     };
 
     // Handle delay reason blur (save when focus lost)
     const handleDelayReasonBlur = () => {
         setIsEditingReason(false);
-        onUpdate(todo.id, { delayReason: editDelayReason || null });
+        onUpdate?.(item.id, { delayReason: editDelayReason || null } as unknown as Partial<T>);
     };
 
     // Calculate delay status
     const getDelayStatus = () => {
-        if (!todo.expectedFinishAt) return null;
+        if (!expectedFinishAt) return null;
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const expected = new Date(todo.expectedFinishAt);
+        const expected = new Date(expectedFinishAt);
         expected.setHours(0, 0, 0, 0);
 
-        if (todo.state === 'completed' && todo.actualFinishAt) {
-            const actual = new Date(todo.actualFinishAt);
+        if (item.state === 'completed' && actualFinishAt) {
+            const actual = new Date(actualFinishAt);
             actual.setHours(0, 0, 0, 0);
             const diffDays = Math.floor((actual.getTime() - expected.getTime()) / (1000 * 60 * 60 * 24));
             if (diffDays > 0) {
@@ -220,10 +207,10 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
     };
 
     const delayStatus = getDelayStatus();
-    const isCompleted = todo.state === 'completed';
+    const isCompleted = item.state === 'completed';
 
     // Format date for display
-    const formatDate = (dateStr: string | null) => {
+    const formatDate = (dateStr: string | null | undefined) => {
         if (!dateStr) return '未设置';
         const date = new Date(dateStr);
         return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
@@ -233,7 +220,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
         <div
             ref={setNodeRef}
             style={style}
-            onClick={() => onSelect && onSelect(todo.id)}
+            onClick={() => onSelect?.(item.id)}
             className={`
                 group relative rounded-2xl border transition-all duration-200 mb-3 cursor-pointer overflow-hidden
                 ${isActive
@@ -242,6 +229,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
                 }
                 ${isDragging ? 'shadow-xl' : ''}
                 ${isCompleted ? 'opacity-70' : ''}
+                ${className || ''}
             `}
         >
             {/* Main Content Row */}
@@ -275,9 +263,9 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
                     {/* Task Content */}
                     <textarea
                         ref={textareaRef}
-                        value={todo.content}
+                        value={item.content}
                         rows={1}
-                        onChange={(e) => onUpdate(todo.id, { content: e.target.value })}
+                        onChange={(e) => onUpdate?.(item.id, { content: e.target.value } as Partial<T>)}
                         onClick={(e) => e.stopPropagation()}
                         className={`
                             w-full bg-transparent border-none outline-none text-sm font-medium p-0 resize-none overflow-hidden
@@ -289,77 +277,82 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
 
                     {/* Time Info Row - Always Visible */}
                     <div className="flex items-center gap-3 flex-wrap mt-2">
-                        {/* Scheduled Date (开始时间) */}
-                        {/* Scheduled Date (开始时间) */}
-                        {todo.scheduledDate && (
-                            <div className="flex items-center gap-1.5 text-xs relative z-30">
-                                <Calendar size={12} className="text-violet-500" />
-                                <span className="text-slate-500">开始:</span>
-                                <input
-                                    type="date"
-                                    value={editScheduledDate}
-                                    onChange={(e) => handleScheduledDateChange(e.target.value)}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault(); // Prevent standard behavior to force picker? No, preventDefault stops focus often.
-                                        // Just stop propagation and show picker
-                                        try {
-                                            if (typeof (e.currentTarget as any).showPicker === 'function') {
-                                                (e.currentTarget as any).showPicker();
-                                            }
-                                        } catch (err) {
-                                            // Fallback or ignore
-                                        }
-                                    }}
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                    className="font-medium text-violet-600 bg-transparent border-none outline-none cursor-pointer text-xs p-0 w-[90px]"
-                                />
-                            </div>
+                        {/* Custom Time Info Render Prop */}
+                        {renderTimeInfo ? (
+                            renderTimeInfo(item)
+                        ) : (
+                            <>
+                                {/* Scheduled Date (开始时间) */}
+                                {scheduledDate && (
+                                    <div className="flex items-center gap-1.5 text-xs relative z-30">
+                                        <Calendar size={12} className="text-violet-500" />
+                                        <span className="text-slate-500">开始:</span>
+                                        <input
+                                            type="date"
+                                            value={editScheduledDate}
+                                            onChange={(e) => handleScheduledDateChange(e.target.value)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                try {
+                                                    if (typeof (e.currentTarget as any).showPicker === 'function') {
+                                                        (e.currentTarget as any).showPicker();
+                                                    }
+                                                } catch (err) { }
+                                            }}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            className="font-medium text-violet-600 bg-transparent border-none outline-none cursor-pointer text-xs p-0 w-[90px]"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Expected Finish Date (预期完成时间) */}
+                                <div className="flex items-center gap-1.5 text-xs relative z-30">
+                                    <Timer size={12} className="text-blue-500" />
+                                    <span className="text-slate-500">预期:</span>
+                                    <input
+                                        type="date"
+                                        value={editExpectedDate}
+                                        onChange={(e) => handleExpectedDateChange(e.target.value)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            try {
+                                                if (typeof (e.currentTarget as any).showPicker === 'function') {
+                                                    (e.currentTarget as any).showPicker();
+                                                }
+                                            } catch (err) { }
+                                        }}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        className="font-medium text-blue-600 bg-transparent border-none outline-none cursor-pointer text-xs p-0 w-[90px]"
+                                    />
+                                </div>
+
+                                {/* Actual Finish Date - Only show if completed */}
+                                {isCompleted && (
+                                    <div className="flex items-center gap-1.5 text-xs relative z-30">
+                                        <Check size={12} className="text-emerald-500" />
+                                        <span className="text-slate-500">完成:</span>
+                                        <input
+                                            type="date"
+                                            value={editActualDate}
+                                            onChange={(e) => handleActualDateChange(e.target.value)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                try {
+                                                    if (typeof (e.currentTarget as any).showPicker === 'function') {
+                                                        (e.currentTarget as any).showPicker();
+                                                    }
+                                                } catch (err) { }
+                                            }}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            className="font-medium text-emerald-600 bg-transparent border-none outline-none cursor-pointer text-xs p-0 w-[90px]"
+                                        />
+                                    </div>
+                                )}
+                            </>
                         )}
 
-                        {/* Expected Finish Date (预期完成时间) */}
-                        <div className="flex items-center gap-1.5 text-xs relative z-30">
-                            <Timer size={12} className="text-blue-500" />
-                            <span className="text-slate-500">预期:</span>
-                            <input
-                                type="date"
-                                value={editExpectedDate}
-                                onChange={(e) => handleExpectedDateChange(e.target.value)}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    try {
-                                        if (typeof (e.currentTarget as any).showPicker === 'function') {
-                                            (e.currentTarget as any).showPicker();
-                                        }
-                                    } catch (err) { }
-                                }}
-                                onMouseDown={(e) => e.stopPropagation()}
-                                className="font-medium text-blue-600 bg-transparent border-none outline-none cursor-pointer text-xs p-0 w-[90px]"
-                            />
-                        </div>
-
-                        {/* Actual Finish Date - Only show if completed */}
-                        {isCompleted && (
-                            <div className="flex items-center gap-1.5 text-xs relative z-30">
-                                <Check size={12} className="text-emerald-500" />
-                                <span className="text-slate-500">完成:</span>
-                                <input
-                                    type="date"
-                                    value={editActualDate}
-                                    onChange={(e) => handleActualDateChange(e.target.value)}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        try {
-                                            if (typeof (e.currentTarget as any).showPicker === 'function') {
-                                                (e.currentTarget as any).showPicker();
-                                            }
-                                        } catch (err) { }
-                                    }}
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                    className="font-medium text-emerald-600 bg-transparent border-none outline-none cursor-pointer text-xs p-0 w-[90px]"
-                                />
-                            </div>
-                        )}
+                        {/* Render Props: Custom Tags */}
+                        {renderTag?.(item)}
 
                         {/* Goal Tag */}
                         {goalName && (
@@ -370,7 +363,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
                         )}
 
                         {/* Plan Tag */}
-                        {(planName || (todo.sourceType === 'plan_doc' && showSource)) && (
+                        {(planName || (sourceType === 'plan_doc' && showSource)) && (
                             <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold border border-blue-100">
                                 <FileText size={10} />
                                 <span>{planName || 'Plan'}</span>
@@ -401,6 +394,9 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
                                 </span>
                             </div>
                         )}
+
+                        {/* Render Props: Extra Content */}
+                        {renderExtra?.(item)}
                     </div>
                 </div>
 
@@ -418,12 +414,15 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
 
                 {/* Hover Actions */}
                 <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    {/* Render Props: Custom Actions */}
+                    {renderActions?.(item)}
+
                     {/* Add Child Button */}
                     {onAddChild && (
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onAddChild(todo.id);
+                                onAddChild(item.id);
                             }}
                             className="p-1.5 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
                             title="添加子项"
@@ -458,7 +457,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
                                         onClick={() => handleColorSelect(color)}
                                         className={`
                                             w-5 h-5 rounded-full border border-slate-200 shadow-sm transition-transform hover:scale-110
-                                            ${todo.color === color ? 'ring-2 ring-slate-400 scale-110' : ''}
+                                            ${item.color === color ? 'ring-2 ring-slate-400 scale-110' : ''}
                                         `}
                                         style={{ backgroundColor: color }}
                                     />
@@ -471,7 +470,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            onDelete(todo.id);
+                            onDelete?.(item.id);
                         }}
                         className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                         title="删除任务"
@@ -513,19 +512,19 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
                         </div>
 
                         {/* Quick Time Summary */}
-                        {(todo.scheduledDate || todo.expectedFinishAt || todo.actualFinishAt) && (
+                        {(scheduledDate || expectedFinishAt || actualFinishAt) && (
                             <div className="flex items-center gap-4 text-xs text-slate-500 pt-1">
-                                {todo.scheduledDate && (
-                                    <span>📅 开始: <strong className="text-slate-600">{formatDate(todo.scheduledDate)}</strong></span>
+                                {scheduledDate && (
+                                    <span>📅 开始: <strong className="text-slate-600">{formatDate(scheduledDate)}</strong></span>
                                 )}
-                                {todo.expectedFinishAt && (
-                                    <span>⏱️ 预期: <strong className="text-slate-600">{formatDate(todo.expectedFinishAt)}</strong></span>
+                                {expectedFinishAt && (
+                                    <span>⏱️ 预期: <strong className="text-slate-600">{formatDate(expectedFinishAt)}</strong></span>
                                 )}
-                                {todo.actualFinishAt && (
-                                    <span>✅ 完成: <strong className="text-slate-600">{formatDate(todo.actualFinishAt)}</strong></span>
+                                {actualFinishAt && (
+                                    <span>✅ 完成: <strong className="text-slate-600">{formatDate(actualFinishAt)}</strong></span>
                                 )}
-                                {todo.delayDays !== null && todo.delayDays > 0 && (
-                                    <span className="text-red-500">🔴 拖延: <strong>{todo.delayDays} 天</strong></span>
+                                {delayDays !== null && delayDays !== undefined && delayDays > 0 && (
+                                    <span className="text-red-500">🔴 拖延: <strong>{delayDays} 天</strong></span>
                                 )}
                             </div>
                         )}
@@ -534,7 +533,7 @@ export const TodoItemDetailed: React.FC<TodoItemDetailedProps> = ({
             )}
         </div>
     );
-};
+}
 
 // Export TODO_COLORS and getRandomColor for external use
 export { TODO_COLORS, getRandomColor };

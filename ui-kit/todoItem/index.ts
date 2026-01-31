@@ -7,7 +7,20 @@ export { TodoItemDetailed } from './TodoItemDetailed';
 export { TodoItemTreeDetailed } from './TodoItemTreeDetailed';
 
 // Types
-export * from './types';
+export type {
+    BaseTodoItem,
+    TodoItem as TodoItemType,
+    TodoItemProps,
+    TodoItemDetailedProps,
+    TodoItemTreeProps,
+    TodoItemTreeDetailedProps,
+} from './types';
 
 // Utilities
-export * from './utils';
+export {
+    flatListToTree,
+    treeToFlatList,
+    getDescendantIds,
+    findItemById,
+    getItemDepth,
+} from './utils';
