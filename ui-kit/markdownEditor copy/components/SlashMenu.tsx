@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useRef, useImperativeHandle, forwardRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { SlashCommandItem } from '../types';
 
@@ -8,54 +8,47 @@ interface SlashMenuProps {
   clientRect: (() => DOMRect | null) | null;
 }
 
-export const SlashMenu: React.FC<SlashMenuProps> = ({
+export interface SlashMenuRef {
+  onKeyDown: (event: KeyboardEvent) => boolean;
+}
+
+export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(({
   items,
   command,
   clientRect,
-}) => {
+}, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const selectItem = useCallback(
-    (index: number) => {
-      const item = items[index];
-      if (item) {
-        command(item);
-      }
-    },
-    [items, command]
-  );
-
+  // Reset selected index when items change
   useEffect(() => {
     setSelectedIndex(0);
   }, [items]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+  // Expose keyboard handler to parent
+  useImperativeHandle(ref, () => ({
+    onKeyDown: (event: KeyboardEvent) => {
       if (event.key === 'ArrowUp') {
-        event.preventDefault();
         setSelectedIndex((prev) => (prev - 1 + items.length) % items.length);
         return true;
       }
 
       if (event.key === 'ArrowDown') {
-        event.preventDefault();
         setSelectedIndex((prev) => (prev + 1) % items.length);
         return true;
       }
 
       if (event.key === 'Enter') {
-        event.preventDefault();
-        selectItem(selectedIndex);
+        const item = items[selectedIndex];
+        if (item) {
+          command(item);
+        }
         return true;
       }
 
       return false;
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [items.length, selectedIndex, selectItem]);
+    },
+  }), [items, selectedIndex, command]);
 
   // Scroll selected item into view
   useEffect(() => {
@@ -91,7 +84,7 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({
         <button
           key={item.title}
           data-index={index}
-          onClick={() => selectItem(index)}
+          onClick={() => command(items[index])}
           className={`
             w-full flex items-center gap-3 px-3 py-2 text-left transition-colors duration-100
             ${index === selectedIndex
@@ -112,6 +105,8 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({
     </div>,
     document.body
   );
-};
+});
+
+SlashMenu.displayName = 'SlashMenu';
 
 export default SlashMenu;

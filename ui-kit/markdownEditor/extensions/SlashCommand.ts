@@ -21,29 +21,14 @@ import React from 'react';
 
 export const slashCommandItems: SlashCommandItem[] = [
   {
-    title: 'Heading 1',
-    description: 'Large section heading',
-    icon: React.createElement(Heading1, { size: 18 }),
+    title: 'TodoBlock',
+    description: '在todoblock中添加的todo会被自动添加到任务池中',
+    icon: React.createElement(ListTodo, { size: 18 }),
     command: (editor: Editor) => {
-      editor.chain().focus().toggleHeading({ level: 1 }).run();
+      (editor as any).chain().focus().insertTaskBlock().run();
     },
   },
-  {
-    title: 'Heading 2',
-    description: 'Medium section heading',
-    icon: React.createElement(Heading2, { size: 18 }),
-    command: (editor: Editor) => {
-      editor.chain().focus().toggleHeading({ level: 2 }).run();
-    },
-  },
-  {
-    title: 'Heading 3',
-    description: 'Small section heading',
-    icon: React.createElement(Heading3, { size: 18 }),
-    command: (editor: Editor) => {
-      editor.chain().focus().toggleHeading({ level: 3 }).run();
-    },
-  },
+  
   {
     title: 'Bullet List',
     description: 'Create a simple bullet list',
@@ -66,14 +51,6 @@ export const slashCommandItems: SlashCommandItem[] = [
     icon: React.createElement(CheckSquare, { size: 18 }),
     command: (editor: Editor) => {
       editor.chain().focus().toggleTaskList().run();
-    },
-  },
-  {
-    title: 'Task Block',
-    description: 'Create a task block with border',
-    icon: React.createElement(ListTodo, { size: 18 }),
-    command: (editor: Editor) => {
-      (editor as any).chain().focus().insertTaskBlock().run();
     },
   },
   {
@@ -117,6 +94,30 @@ export const slashCommandItems: SlashCommandItem[] = [
       if (url) {
         editor.chain().focus().setImage({ src: url }).run();
       }
+    },
+  },
+  {
+    title: 'Heading 1',
+    description: 'Large section heading',
+    icon: React.createElement(Heading1, { size: 18 }),
+    command: (editor: Editor) => {
+      editor.chain().focus().toggleHeading({ level: 1 }).run();
+    },
+  },
+  {
+    title: 'Heading 2',
+    description: 'Medium section heading',
+    icon: React.createElement(Heading2, { size: 18 }),
+    command: (editor: Editor) => {
+      editor.chain().focus().toggleHeading({ level: 2 }).run();
+    },
+  },
+  {
+    title: 'Heading 3',
+    description: 'Small section heading',
+    icon: React.createElement(Heading3, { size: 18 }),
+    command: (editor: Editor) => {
+      editor.chain().focus().toggleHeading({ level: 3 }).run();
     },
   },
 ];

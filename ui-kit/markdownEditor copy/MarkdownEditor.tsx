@@ -21,7 +21,7 @@ import { MarkdownEditorProps, MarkdownEditorRef, SlashCommandItem } from './type
 import { editorToMarkdown, markdownToHtml } from './utils';
 import { SlashCommand, slashCommandItems, SlashCommandPluginKey } from './extensions/SlashCommand';
 import { BubbleMenuComponent } from './components/BubbleMenu';
-import { SlashMenu } from './components/SlashMenu';
+import { SlashMenu, SlashMenuRef } from './components/SlashMenu';
 
 export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   (
@@ -42,6 +42,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
       command: (item: SlashCommandItem) => void;
       clientRect: (() => DOMRect | null) | null;
     } | null>(null);
+    const slashMenuRef = React.useRef<SlashMenuRef>(null);
 
     const editor = useEditor({
       extensions: [
@@ -115,6 +116,10 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
                   if (props.event.key === 'Escape') {
                     setSlashMenuProps(null);
                     return true;
+                  }
+                  // Delegate to SlashMenu for arrow keys and Enter
+                  if (slashMenuRef.current) {
+                    return slashMenuRef.current.onKeyDown(props.event);
                   }
                   return false;
                 },
@@ -347,6 +352,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
         <EditorContent editor={editor} />
         {slashMenuProps && (
           <SlashMenu
+            ref={slashMenuRef}
             items={slashMenuProps.items}
             command={slashMenuProps.command}
             clientRect={slashMenuProps.clientRect}

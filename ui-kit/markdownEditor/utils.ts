@@ -69,7 +69,7 @@ function jsonToMarkdown(node: any, listDepth = 0): string {
       return indent + '- ' + childContent.trim() + '\n';
     case 'taskListContainer': {
       const taskContent = content?.map((item: any) => jsonToMarkdown(item, 0)).join('') || '';
-      return `<!-- lp:taskblock -->\n${taskContent}<!-- /lp:taskblock -->\n\n`;
+      return `<!-- lp:todoblock -->\n${taskContent}<!-- /lp:todoblock -->\n\n`;
     }
     case 'taskList':
       return content?.map((item: any) => jsonToMarkdown(item, listDepth)).join('') || '';
@@ -196,7 +196,7 @@ export function markdownToHtml(markdown: string): string {
  * Parse taskblock comments and task lists
  */
 function parseTaskBlocks(html: string): string {
-  // Handle <!-- lp:taskblock --> wrapped regions
+  // Handle <!-- lp:todoblock --> wrapped regions
   html = html.replace(
     /&lt;!-- lp:taskblock --&gt;\n([\s\S]*?)&lt;!-- \/lp:taskblock --&gt;/g,
     (_, content) => {
