@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { SlashCommandItem } from '../types';
 
 interface SlashMenuProps {
@@ -74,11 +75,13 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({
         position: 'fixed',
         top: rect.bottom + 8,
         left: rect.left,
-        zIndex: 50,
+        zIndex: 9999,
       }
     : {};
 
-  return (
+  // Use portal to render menu at document.body level
+  // This fixes positioning issues when parent has backdrop-filter/transform
+  return createPortal(
     <div
       ref={menuRef}
       style={style}
@@ -106,7 +109,8 @@ export const SlashMenu: React.FC<SlashMenuProps> = ({
           </div>
         </button>
       ))}
-    </div>
+    </div>,
+    document.body
   );
 };
 
