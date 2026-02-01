@@ -67,30 +67,11 @@ function jsonToMarkdown(node: any, listDepth = 0): string {
     case 'listItem':
       const indent = '  '.repeat(listDepth);
       return indent + '- ' + childContent.trim() + '\n';
-    case 'taskListContainer': {
-      const taskContent = content?.map((item: any) => jsonToMarkdown(item, 0)).join('') || '';
-      return `<!-- lp:taskblock -->\n${taskContent}<!-- /lp:taskblock -->\n\n`;
-    }
     case 'taskList':
       return content?.map((item: any) => jsonToMarkdown(item, listDepth)).join('') || '';
-    case 'taskItem': {
+    case 'taskItem':
       const checked = attrs?.checked ? 'x' : ' ';
-      const indent = '\t'.repeat(listDepth);
-      // Handle nested taskList (subtasks)
-      const parts = content || [];
-      let textContent = '';
-      let nestedContent = '';
-
-      for (const child of parts) {
-        if (child.type === 'taskList') {
-          nestedContent += jsonToMarkdown(child, listDepth + 1);
-        } else {
-          textContent += jsonToMarkdown(child, listDepth);
-        }
-      }
-
-      return `${indent}- [${checked}] ${textContent.trim()}\n${nestedContent}`;
-    }
+      return `- [${checked}] ` + childContent.trim() + '\n';
     case 'blockquote':
       return childContent.split('\n').filter(Boolean).map((line: string) => '> ' + line).join('\n') + '\n\n';
     case 'codeBlock':
@@ -165,8 +146,9 @@ export function markdownToHtml(markdown: string): string {
   // Links
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 
-  // Handle taskblock comments and task lists
-  html = parseTaskBlocks(html);
+  // Task lists
+  html = html.replace(/^- \[x\] (.+)$/gm, '<ul data-type="taskList"><li data-type="taskItem" data-checked="true">$1</li></ul>');
+  html = html.replace(/^- \[ \] (.+)$/gm, '<ul data-type="taskList"><li data-type="taskItem" data-checked="false">$1</li></ul>');
 
   // Unordered lists
   html = html.replace(/^- (.+)$/gm, '<ul><li>$1</li></ul>');
@@ -190,42 +172,4 @@ export function markdownToHtml(markdown: string): string {
   html = html.replace(/<p><\/p>/g, '');
 
   return html;
-}
-
-/**
- * Parse taskblock comments and task lists
- */
-function parseTaskBlocks(html: string): string {
-  // Handle <!-- lp:taskblock --> wrapped regions
-  html = html.replace(
-    /&lt;!-- lp:taskblock --&gt;\n([\s\S]*?)&lt;!-- \/lp:taskblock --&gt;/g,
-    (_, content) => {
-      const parsed = parseTaskListWithIndent(content);
-      return `<div data-type="task-block" class="task-block-container">${parsed}</div>`;
-    }
-  );
-
-  // Handle regular task lists (not inside taskblock)
-  html = html.replace(/^(\t*)- \[(x| )\] (.+)$/gm, (_, indent, checked, text) => {
-    const isChecked = checked === 'x';
-    return `<ul data-type="taskList"><li data-type="taskItem" data-checked="${isChecked}">${text}</li></ul>`;
-  });
-
-  return html;
-}
-
-/**
- * Parse task list content with indentation support
- */
-function parseTaskListWithIndent(content: string): string {
-  const lines = content.split('\n').filter(line => line.trim());
-  return lines.map(line => {
-    const match = line.match(/^(\t*)- \[(x| )\] (.+)$/);
-    if (match) {
-      const [, , checked, text] = match;
-      const isChecked = checked === 'x';
-      return `<ul data-type="taskList"><li data-type="taskItem" data-checked="${isChecked}">${text}</li></ul>`;
-    }
-    return line;
-  }).join('');
 }

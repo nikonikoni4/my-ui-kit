@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { TodoItemTreeDetailed, type TodoItem } from '@my-ui-kit/core';
-
+import { type TodoItem } from '../../../ui-kit/todoItem/types';
+import { TodoItemTreeDetailed } from '../../../ui-kit/todoItem' ;
 const INITIAL_ITEMS: TodoItem[] = [
     {
         id: 1,
@@ -23,7 +23,7 @@ const INITIAL_ITEMS: TodoItem[] = [
             {
                 id: 11,
                 content: "Child Task 1.1",
-                parentId: 1,
+                parentId: '1',
                 goalId: null,
                 planDocId: null,
                 sourceType: 'manual',
@@ -42,7 +42,7 @@ const INITIAL_ITEMS: TodoItem[] = [
             {
                 id: 12,
                 content: "Child Task 1.2 (Completed)",
-                parentId: 1,
+                parentId: '1',
                 goalId: null,
                 planDocId: null,
                 sourceType: 'manual',

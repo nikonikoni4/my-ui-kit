@@ -10,7 +10,6 @@ import Placeholder from '@tiptap/extension-placeholder';
 import UnderlineExtension from '@tiptap/extension-underline';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
-import { TaskListContainer } from './extensions/TaskListContainer';
 import { Table } from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
@@ -60,7 +59,6 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
         TaskItem.configure({
           nested: true,
         }),
-        TaskListContainer,
         Table.configure({
           resizable: true,
         }),
@@ -342,20 +340,6 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
             max-width: 100%;
             height: auto;
             border-radius: 0.5em;
-          }
-
-          /* Task Block container styles */
-          .markdown-editor .ProseMirror .task-block-container {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
-            background-color: #f9fafb;
-            padding: 0.75rem 1rem;
-            margin: 1em 0;
-          }
-
-          /* Nested task indentation inside task block */
-          .markdown-editor .ProseMirror .task-block-container ul[data-type="taskList"] ul[data-type="taskList"] {
-            margin-left: 1.5em;
           }
         `}</style>
 

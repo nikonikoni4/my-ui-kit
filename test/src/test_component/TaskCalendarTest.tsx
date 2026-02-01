@@ -1,7 +1,7 @@
 
 import { useState } from 'react'
-import { TaskCalendar } from '@my-ui-kit/core'
-import type { CalendarTask } from '@my-ui-kit/core'
+import { TaskCalendar } from '../../../ui-kit'
+import type { CalendarTask } from '../../../ui-kit'
 
 export function TaskCalendarTest() {
     // 生成模拟任务数据

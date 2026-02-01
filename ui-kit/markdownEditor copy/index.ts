@@ -4,4 +4,3 @@ export { editorToMarkdown, markdownToHtml } from './utils';
 export { BubbleMenuComponent } from './components/BubbleMenu';
 export { SlashMenu } from './components/SlashMenu';
 export { SlashCommand, slashCommandItems } from './extensions/SlashCommand';
-export { TaskListContainer } from './extensions/TaskListContainer';

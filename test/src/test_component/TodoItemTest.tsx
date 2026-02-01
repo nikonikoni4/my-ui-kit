@@ -1,6 +1,6 @@
 
 import { useState } from 'react'
-import { TodoItem } from '@my-ui-kit/core'
+import { TodoItem } from '../../../ui-kit'
 
 export function TodoItemTest() {
     const [todo, setTodo] = useState({

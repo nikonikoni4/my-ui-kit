@@ -10,7 +10,6 @@ import {
   List,
   ListOrdered,
   CheckSquare,
-  ListTodo,
   Quote,
   Code,
   Minus,
@@ -66,14 +65,6 @@ export const slashCommandItems: SlashCommandItem[] = [
     icon: React.createElement(CheckSquare, { size: 18 }),
     command: (editor: Editor) => {
       editor.chain().focus().toggleTaskList().run();
-    },
-  },
-  {
-    title: 'Task Block',
-    description: 'Create a task block with border',
-    icon: React.createElement(ListTodo, { size: 18 }),
-    command: (editor: Editor) => {
-      (editor as any).chain().focus().insertTaskBlock().run();
     },
   },
   {

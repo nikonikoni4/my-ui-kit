@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { MarkdownEditor, MarkdownEditorRef } from '@my-ui-kit/core';
+import { MarkdownEditor, MarkdownEditorRef } from '../../../ui-kit';
 
 const initialMarkdown = `# Welcome to MarkdownEditor
 
