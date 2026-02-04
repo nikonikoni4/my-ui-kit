@@ -188,7 +188,8 @@ export function TodoItem<T extends BaseTodoItem = BaseTodoItem>({
             style={style}
             onClick={() => onSelect?.(item.id)}
             className={`
-                group relative flex items-start gap-3 py-3 pr-3 pl-10 transition-all duration-200 cursor-pointer
+                group relative flex items-start gap-2 py-3 pr-3 transition-all duration-200 cursor-pointer
+                ${disableCardStyle ? 'pl-2' : 'pl-10'}
                 ${disableCardStyle
                     ? 'mb-0'
                     : 'rounded-xl rounded-l-md mb-2 border border-slate-200/80'
@@ -204,15 +205,28 @@ export function TodoItem<T extends BaseTodoItem = BaseTodoItem>({
                 ${className || ''}
             `}
         >
-            {/* Drag Handle - Floating on left */}
-            <div
-                {...attributes}
-                {...listeners}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute left-1 top-1 p-2 px-2.5 text-slate-300 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing hover:text-slate-600 hover:bg-slate-200/50 rounded-xl transition-all z-20 flex items-center justify-center mt-0.5"
-            >
-                <GripVertical size={18} />
-            </div>
+            {/* Drag Handle */}
+            {disableCardStyle ? (
+                /* 内联拖拽把手 - 用于 disableCardStyle 模式 */
+                <div
+                    {...attributes}
+                    {...listeners}
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-shrink-0 p-1 text-slate-300 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing hover:text-slate-600 hover:bg-slate-200/50 rounded-lg transition-all flex items-center justify-center mt-0.5"
+                >
+                    <GripVertical size={16} />
+                </div>
+            ) : (
+                /* 绝对定位拖拽把手 - 用于卡片模式 */
+                <div
+                    {...attributes}
+                    {...listeners}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute left-1 top-1 p-2 px-2.5 text-slate-300 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing hover:text-slate-600 hover:bg-slate-200/50 rounded-xl transition-all z-20 flex items-center justify-center mt-0.5"
+                >
+                    <GripVertical size={18} />
+                </div>
+            )}
 
             {/* Checkbox */}
             <button
