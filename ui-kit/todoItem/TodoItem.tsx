@@ -21,6 +21,14 @@ const STATE_COLORS: Record<string, string> = {
     shelved: 'bg-gray-400'
 };
 
+// State border colors for left accent
+const STATE_BORDER_COLORS: Record<string, string> = {
+    pool: '#6366f1',      // indigo-500
+    scheduled: '#8b5cf6', // violet-500
+    completed: '#10b981', // emerald-500
+    shelved: '#9ca3af'    // gray-400
+};
+
 // Available todo background colors
 const TODO_COLORS = [
     '#FFFFFF', // White
@@ -48,12 +56,12 @@ export function TodoItem<T extends BaseTodoItem = BaseTodoItem>({
     renderTag,
     renderExtra,
     renderActions,
-    showSource = true,
     showDate = true,
     showEditButton = false,
     dragType,
     dragSource,
     disableSortable = false,
+    disableCardStyle = false,
     className,
 }: TodoItemProps<T>) {
     const [showColorPicker, setShowColorPicker] = useState(false);
@@ -64,7 +72,6 @@ export function TodoItem<T extends BaseTodoItem = BaseTodoItem>({
     // Type-safe access to optional properties
     const itemAny = item as any;
     const scheduledDate = itemAny.scheduledDate as string | null | undefined;
-    const sourceType = itemAny.sourceType as string | undefined;
     const expectedFinishAt = itemAny.expectedFinishAt as string | null | undefined;
     const actualFinishAt = itemAny.actualFinishAt as string | null | undefined;
     const delayReason = itemAny.delayReason as string | null | undefined;
@@ -92,13 +99,16 @@ export function TodoItem<T extends BaseTodoItem = BaseTodoItem>({
         } : undefined,
     });
 
+    const borderColor = STATE_BORDER_COLORS[item.state] || STATE_BORDER_COLORS.pool;
+
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition: isDragging ? undefined : transition,
         opacity: isDragging ? 0.6 : 1,
         zIndex: isDragging ? 50 : 'auto',
         position: 'relative',
-        backgroundColor: item.color || '#FFFFFF',
+        backgroundColor: disableCardStyle ? 'transparent' : (item.color || '#FFFFFF'),
+        ...(disableCardStyle ? {} : { borderLeft: `3px solid ${borderColor}` }),
     };
 
     // Auto-resize for textarea
@@ -178,10 +188,16 @@ export function TodoItem<T extends BaseTodoItem = BaseTodoItem>({
             style={style}
             onClick={() => onSelect?.(item.id)}
             className={`
-                group relative flex items-start gap-3 py-3 pr-3 pl-10 rounded-2xl border transition-all duration-200 mb-2 cursor-pointer
-                ${isActive
-                    ? 'ring-2 ring-blue-400 border-blue-400 shadow-md z-10'
-                    : 'border-transparent hover:border-slate-200 hover:shadow-sm'
+                group relative flex items-start gap-3 py-3 pr-3 pl-10 transition-all duration-200 cursor-pointer
+                ${disableCardStyle
+                    ? 'mb-0'
+                    : 'rounded-xl rounded-l-md mb-2 border border-slate-200/80'
+                }
+                ${disableCardStyle
+                    ? ''
+                    : isActive
+                        ? 'ring-2 ring-blue-400 shadow-lg z-10'
+                        : 'shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.12)] hover:-translate-y-0.5'
                 }
                 ${isDragging ? 'shadow-xl' : ''}
                 ${isCompleted ? 'opacity-60' : ''}
@@ -234,13 +250,7 @@ export function TodoItem<T extends BaseTodoItem = BaseTodoItem>({
                     {/* Render Props: Custom Tags */}
                     {renderTag?.(item)}
 
-                    {/* Source Pill */}
-                    {sourceType === 'plan_doc' && showSource && (
-                        <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold border border-blue-100">
-                            <FileText size={10} />
-                            <span>Plan</span>
-                        </div>
-                    )}
+
 
                     {/* Date Pill */}
                     {scheduledDate && showDate && (

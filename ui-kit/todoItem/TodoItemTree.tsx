@@ -38,7 +38,6 @@ interface TodoItemNodeProps<T extends BaseTodoItem> {
     onUpdate?: (id: T['id'], updates: Partial<T>) => void;
     onDelete?: (id: T['id']) => void;
     onSelect?: (id: T['id']) => void;
-    showSource?: boolean;
     showDate?: boolean;
     renderTag?: (item: T) => React.ReactNode;
     renderExtra?: (item: T) => React.ReactNode;
@@ -64,7 +63,6 @@ function TodoItemNode<T extends BaseTodoItem>({
     onUpdate,
     onDelete,
     onSelect,
-    showSource,
     showDate,
     renderTag,
     renderExtra,
@@ -116,7 +114,7 @@ function TodoItemNode<T extends BaseTodoItem>({
                         onUpdate={onUpdate}
                         onDelete={onDelete}
                         onSelect={onSelect}
-                        showSource={showSource}
+
                         showDate={showDate}
                         renderTag={renderTag}
                         renderExtra={renderExtra}
@@ -162,7 +160,6 @@ export function TodoItemTree<T extends BaseTodoItem = BaseTodoItem>({
     onSelect,
     onDragEnd,
     onExpandChange,
-    showSource = true,
     showDate = true,
     renderTag,
     renderExtra,
@@ -214,7 +211,7 @@ export function TodoItemTree<T extends BaseTodoItem = BaseTodoItem>({
                 onUpdate={onUpdate}
                 onDelete={onDelete}
                 onSelect={onSelect}
-                showSource={showSource}
+
                 showDate={showDate}
                 renderTag={renderTag}
                 renderExtra={renderExtra}

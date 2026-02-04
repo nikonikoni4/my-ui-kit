@@ -47,8 +47,6 @@ export interface TodoItemProps<T extends BaseTodoItem = BaseTodoItem> {
     renderActions?: (item: T) => React.ReactNode;
 
     // === 显示控制 ===
-    /** 是否显示来源标签 */
-    showSource?: boolean;
     /** 是否显示日期标签 */
     showDate?: boolean;
     /** 是否显示编辑按钮 */
@@ -63,6 +61,8 @@ export interface TodoItemProps<T extends BaseTodoItem = BaseTodoItem> {
     disableSortable?: boolean;
 
     // === 样式 ===
+    /** 禁用卡片样式（边框、阴影、左边框），用于嵌入自定义容器时 */
+    disableCardStyle?: boolean;
     className?: string;
 }
 
@@ -94,7 +94,6 @@ export interface TodoItemDetailedProps<T extends BaseTodoItem = BaseTodoItem> {
     renderTimeInfo?: (item: T) => React.ReactNode;
 
     // === 显示控制 ===
-    showSource?: boolean;
     showDate?: boolean;
 
     // === 外部数据（可选，用于显示关联信息） ===
@@ -173,7 +172,6 @@ export interface TodoItem extends BaseTodoItem {
     parentId: string | null;
     goalId: string | null;
     planDocId: string | null;
-    sourceType: 'manual' | 'plan_doc';
     sourceAnchorId: string | null;
     state: 'pool' | 'scheduled' | 'completed' | 'shelved';
     scheduledDate: string | null;

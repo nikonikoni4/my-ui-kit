@@ -30,6 +30,14 @@ const TODO_COLORS = [
     '#F3F4F6'  // Grey
 ];
 
+// State border colors for left accent
+const STATE_BORDER_COLORS: Record<string, string> = {
+    pool: '#6366f1',      // indigo-500
+    scheduled: '#8b5cf6', // violet-500
+    completed: '#10b981', // emerald-500
+    shelved: '#9ca3af'    // gray-400
+};
+
 // Get random color from TODO_COLORS
 const getRandomColor = () => TODO_COLORS[Math.floor(Math.random() * TODO_COLORS.length)];
 
@@ -50,7 +58,6 @@ export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
     renderTimeInfo,
     goalName,
     planName,
-    showSource = true,
     showDate = true,
     className,
 }: TodoItemDetailedProps<T>) {
@@ -62,7 +69,6 @@ export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
     // Type-safe access to optional properties
     const itemAny = item as any;
     const scheduledDate = itemAny.scheduledDate as string | null | undefined;
-    const sourceType = itemAny.sourceType as string | undefined;
     const expectedFinishAt = itemAny.expectedFinishAt as string | null | undefined;
     const actualFinishAt = itemAny.actualFinishAt as string | null | undefined;
     const delayReason = itemAny.delayReason as string | null | undefined;
@@ -83,6 +89,8 @@ export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
         isDragging,
     } = useSortable({ id: item.id });
 
+    const borderColor = STATE_BORDER_COLORS[item.state] || STATE_BORDER_COLORS.pool;
+
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition: isDragging ? undefined : transition,
@@ -90,6 +98,7 @@ export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
         zIndex: isDragging ? 50 : 'auto',
         position: 'relative',
         backgroundColor: item.color || '#FFFFFF',
+        borderLeft: `4px solid ${borderColor}`,
     };
 
     // Auto-resize for textarea
@@ -222,10 +231,10 @@ export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
             style={style}
             onClick={() => onSelect?.(item.id)}
             className={`
-                group relative rounded-2xl border transition-all duration-200 mb-3 cursor-pointer overflow-hidden
+                group relative rounded-xl rounded-l-md transition-all duration-200 mb-3 cursor-pointer overflow-hidden border border-slate-200/80
                 ${isActive
-                    ? 'ring-2 ring-blue-400 border-blue-400 shadow-md z-10'
-                    : 'border-slate-200/80 hover:border-slate-300 hover:shadow-sm'
+                    ? 'ring-2 ring-blue-400 shadow-lg z-10'
+                    : 'shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_16px_-4px_rgba(0,0,0,0.12)] hover:-translate-y-0.5'
                 }
                 ${isDragging ? 'shadow-xl' : ''}
                 ${isCompleted ? 'opacity-70' : ''}
@@ -233,15 +242,15 @@ export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
             `}
         >
             {/* Main Content Row */}
-            <div className="flex items-start gap-3 py-3 pr-3 pl-10">
-                {/* Drag Handle - Floating on left */}
+            <div className="flex items-start gap-3 py-3 pr-3 pl-3">
+                {/* Drag Handle */}
                 <div
                     {...attributes}
                     {...listeners}
                     onClick={(e) => e.stopPropagation()}
-                    className="absolute left-1 top-1 p-2 px-2.5 text-slate-300 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing hover:text-slate-600 hover:bg-slate-200/50 rounded-xl transition-all z-20 flex items-center justify-center mt-0.5"
+                    className="p-1 text-slate-300 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing hover:text-slate-600 hover:bg-slate-200/50 rounded-lg transition-all flex-shrink-0 mt-0.5"
                 >
-                    <GripVertical size={18} />
+                    <GripVertical size={16} />
                 </div>
 
                 {/* Checkbox */}
@@ -363,10 +372,10 @@ export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
                         )}
 
                         {/* Plan Tag */}
-                        {(planName || (sourceType === 'plan_doc' && showSource)) && (
+                        {planName && (
                             <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold border border-blue-100">
                                 <FileText size={10} />
-                                <span>{planName || 'Plan'}</span>
+                                <span>{planName}</span>
                             </div>
                         )}
 

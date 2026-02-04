@@ -143,6 +143,11 @@ function tableToMarkdown(tableNode: any): string {
 export function markdownToHtml(markdown: string): string {
   let html = markdown;
 
+  // Strip inline lp comments that should be hidden (todo IDs, system-section markers)
+  // Must be done BEFORE HTML escaping
+  html = html.replace(/<!-- lp:t-[a-f0-9]+ -->/g, '');
+  html = html.replace(/<!-- lp:system-section -->\n?/g, '');
+
   // Escape HTML
   html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -196,36 +201,97 @@ export function markdownToHtml(markdown: string): string {
  * Parse taskblock comments and task lists
  */
 function parseTaskBlocks(html: string): string {
-  // Handle <!-- lp:todoblock --> wrapped regions
+  // Handle <!-- lp:todoblock --> wrapped regions (注意：使用 todoblock 而不是 taskblock)
   html = html.replace(
-    /&lt;!-- lp:taskblock --&gt;\n([\s\S]*?)&lt;!-- \/lp:taskblock --&gt;/g,
+    /&lt;!-- lp:todoblock --&gt;\n([\s\S]*?)&lt;!-- \/lp:todoblock --&gt;/g,
     (_, content) => {
       const parsed = parseTaskListWithIndent(content);
       return `<div data-type="task-block" class="task-block-container">${parsed}</div>`;
     }
   );
 
-  // Handle regular task lists (not inside taskblock)
+  // Handle regular task lists (not inside todoblock)
   html = html.replace(/^(\t*)- \[(x| )\] (.+)$/gm, (_, indent, checked, text) => {
     const isChecked = checked === 'x';
     return `<ul data-type="taskList"><li data-type="taskItem" data-checked="${isChecked}">${text}</li></ul>`;
   });
 
+  // Remove inline lp comments like <!-- lp:t-xxx --> (todo IDs) - they should be hidden
+  html = html.replace(/&lt;!-- lp:t-[a-f0-9]+ --&gt;/g, '');
+
+  // Handle <!-- lp:system-section --> as hidden marker (convert to invisible span)
+  html = html.replace(
+    /&lt;!-- lp:system-section --&gt;/g,
+    '<span data-type="system-section" style="display:none;"></span>'
+  );
+
   return html;
 }
 
 /**
- * Parse task list content with indentation support
+ * 解析带缩进的任务列表为嵌套 HTML 结构
+ * 输入格式:
+ *   - [ ] A
+ *   \t- [ ] B (tab 缩进表示嵌套)
+ *   \t\t- [ ] C (两个 tab 表示更深层嵌套)
  */
 function parseTaskListWithIndent(content: string): string {
   const lines = content.split('\n').filter(line => line.trim());
-  return lines.map(line => {
+
+  interface TaskNode {
+    checked: boolean;
+    text: string;
+    children: TaskNode[];
+  }
+
+  // 解析所有任务项，构建树结构
+  const root: TaskNode[] = [];
+  const stack: { node: TaskNode; depth: number }[] = [];
+
+  for (const line of lines) {
     const match = line.match(/^(\t*)- \[(x| )\] (.+)$/);
-    if (match) {
-      const [, , checked, text] = match;
-      const isChecked = checked === 'x';
-      return `<ul data-type="taskList"><li data-type="taskItem" data-checked="${isChecked}">${text}</li></ul>`;
+    if (!match) continue;
+
+    const [, tabs, checked, rawText] = match;
+    // Strip inline lp comments like <!-- lp:t-xxx --> from task text
+    const text = rawText.replace(/&lt;!-- lp:t-[a-f0-9]+ --&gt;/g, '').trim();
+    const depth = tabs.length;
+    const node: TaskNode = {
+      checked: checked === 'x',
+      text,
+      children: []
+    };
+
+    // 找到父节点
+    while (stack.length > 0 && stack[stack.length - 1].depth >= depth) {
+      stack.pop();
     }
-    return line;
-  }).join('');
+
+    if (stack.length === 0) {
+      // 根级任务
+      root.push(node);
+    } else {
+      // 添加到父节点的 children
+      stack[stack.length - 1].node.children.push(node);
+    }
+
+    stack.push({ node, depth });
+  }
+
+  // 递归生成 HTML
+  function nodeToHtml(nodes: TaskNode[]): string {
+    if (nodes.length === 0) return '';
+
+    const items = nodes.map(node => {
+      const childrenHtml = nodeToHtml(node.children);
+      // 如果有子任务，需要在 li 内部嵌套 ul
+      const nestedList = childrenHtml ? `<ul data-type="taskList">${childrenHtml}</ul>` : '';
+      return `<li data-type="taskItem" data-checked="${node.checked}">${node.text}${nestedList}</li>`;
+    }).join('');
+
+    return items;
+  }
+
+  const innerHtml = nodeToHtml(root);
+  return innerHtml ? `<ul data-type="taskList">${innerHtml}</ul>` : '';
 }

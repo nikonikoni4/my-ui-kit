@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { type TodoItem } from '../../../ui-kit/todoItem/types';
-import { TodoItemTreeDetailed } from '../../../ui-kit/todoItem' ;
+import { TodoItemTreeDetailed } from '../../../ui-kit/todoItem';
 const INITIAL_ITEMS: TodoItem[] = [
     {
         id: 1,
@@ -8,7 +8,7 @@ const INITIAL_ITEMS: TodoItem[] = [
         parentId: null,
         goalId: null,
         planDocId: null,
-        sourceType: 'manual',
+
         sourceAnchorId: null,
         state: 'scheduled',
         scheduledDate: '2023-10-27',
@@ -26,7 +26,7 @@ const INITIAL_ITEMS: TodoItem[] = [
                 parentId: '1',
                 goalId: null,
                 planDocId: null,
-                sourceType: 'manual',
+
                 sourceAnchorId: null,
                 state: 'scheduled',
                 scheduledDate: '2023-10-27',
@@ -45,7 +45,7 @@ const INITIAL_ITEMS: TodoItem[] = [
                 parentId: '1',
                 goalId: null,
                 planDocId: null,
-                sourceType: 'manual',
+
                 sourceAnchorId: null,
                 state: 'completed',
                 scheduledDate: '2023-10-27',
@@ -66,7 +66,7 @@ const INITIAL_ITEMS: TodoItem[] = [
         parentId: null,
         goalId: null,
         planDocId: null,
-        sourceType: 'manual',
+
         sourceAnchorId: null,
         state: 'scheduled',
         scheduledDate: '2023-10-26',
@@ -141,7 +141,7 @@ export const TodoItemTreeDetailedTest: React.FC = () => {
                     onExpandChange={handleExpandChange}
                     collapsible={true}
                     showDate={true}
-                    showSource={true}
+
                 />
             </div>
 
