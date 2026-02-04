@@ -9,7 +9,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import UnderlineExtension from '@tiptap/extension-underline';
 import TaskList from '@tiptap/extension-task-list';
-import TaskItem from '@tiptap/extension-task-item';
+import { TaskItemWithAnchor } from './extensions/TaskItemWithAnchor';
 import { TaskListContainer } from './extensions/TaskListContainer';
 import { Table } from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
@@ -58,7 +58,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
         }),
         UnderlineExtension,
         TaskList,
-        TaskItem.configure({
+        TaskItemWithAnchor.configure({
           nested: true,
         }),
         TaskListContainer,

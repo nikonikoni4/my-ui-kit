@@ -89,7 +89,11 @@ function jsonToMarkdown(node: any, listDepth = 0): string {
         }
       }
 
-      return `${indent}- [${checked}] ${textContent.trim()}\n${nestedContent}`;
+      // 保留锚点 ID（如果存在）
+      const anchorId = attrs?.anchorId;
+      const anchorSuffix = anchorId ? ` <!-- lp:${anchorId} -->` : '';
+
+      return `${indent}- [${checked}] ${textContent.trim()}${anchorSuffix}\n${nestedContent}`;
     }
     case 'blockquote':
       return childContent.split('\n').filter(Boolean).map((line: string) => '> ' + line).join('\n') + '\n\n';
@@ -143,10 +147,12 @@ function tableToMarkdown(tableNode: any): string {
 export function markdownToHtml(markdown: string): string {
   let html = markdown;
 
-  // Strip inline lp comments that should be hidden (todo IDs, system-section markers)
+  // Strip system-section markers (these should be hidden)
   // Must be done BEFORE HTML escaping
-  html = html.replace(/<!-- lp:t-[a-f0-9]+ -->/g, '');
   html = html.replace(/<!-- lp:system-section -->\n?/g, '');
+
+  // NOTE: 锚点注释 <!-- lp:t-xxx --> 不在这里移除
+  // 它们会在 parseTaskBlocks -> parseTaskListWithIndent 中被解析并保留为 data-anchor-id 属性
 
   // Escape HTML
   html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -210,13 +216,19 @@ function parseTaskBlocks(html: string): string {
     }
   );
 
-  // Handle regular task lists (not inside todoblock)
+  // Handle regular task lists (not inside todoblock) - 保留锚点
   html = html.replace(/^(\t*)- \[(x| )\] (.+)$/gm, (_, indent, checked, text) => {
     const isChecked = checked === 'x';
-    return `<ul data-type="taskList"><li data-type="taskItem" data-checked="${isChecked}">${text}</li></ul>`;
+    // 提取锚点 ID
+    const anchorPattern = /&lt;!-- lp:(t-[a-f0-9]+) --&gt;/;
+    const anchorMatch = text.match(anchorPattern);
+    const anchorId = anchorMatch ? anchorMatch[1] : null;
+    const cleanText = text.replace(anchorPattern, '').trim();
+    const anchorAttr = anchorId ? ` data-anchor-id="${anchorId}"` : '';
+    return `<ul data-type="taskList"><li data-type="taskItem" data-checked="${isChecked}"${anchorAttr}>${cleanText}</li></ul>`;
   });
 
-  // Remove inline lp comments like <!-- lp:t-xxx --> (todo IDs) - they should be hidden
+  // Remove any remaining inline lp anchor comments (outside of task items)
   html = html.replace(/&lt;!-- lp:t-[a-f0-9]+ --&gt;/g, '');
 
   // Handle <!-- lp:system-section --> as hidden marker (convert to invisible span)
@@ -231,9 +243,11 @@ function parseTaskBlocks(html: string): string {
 /**
  * 解析带缩进的任务列表为嵌套 HTML 结构
  * 输入格式:
- *   - [ ] A
+ *   - [ ] A <!-- lp:t-xxxxxxxx -->
  *   \t- [ ] B (tab 缩进表示嵌套)
  *   \t\t- [ ] C (两个 tab 表示更深层嵌套)
+ *
+ * 锚点 ID 会被保留为 data-anchor-id 属性
  */
 function parseTaskListWithIndent(content: string): string {
   const lines = content.split('\n').filter(line => line.trim());
@@ -241,6 +255,7 @@ function parseTaskListWithIndent(content: string): string {
   interface TaskNode {
     checked: boolean;
     text: string;
+    anchorId: string | null;
     children: TaskNode[];
   }
 
@@ -248,17 +263,26 @@ function parseTaskListWithIndent(content: string): string {
   const root: TaskNode[] = [];
   const stack: { node: TaskNode; depth: number }[] = [];
 
+  // 锚点匹配正则（HTML 转义后的格式）
+  const anchorPattern = /&lt;!-- lp:(t-[a-f0-9]+) --&gt;/;
+
   for (const line of lines) {
     const match = line.match(/^(\t*)- \[(x| )\] (.+)$/);
     if (!match) continue;
 
     const [, tabs, checked, rawText] = match;
-    // Strip inline lp comments like <!-- lp:t-xxx --> from task text
-    const text = rawText.replace(/&lt;!-- lp:t-[a-f0-9]+ --&gt;/g, '').trim();
+
+    // 提取锚点 ID
+    const anchorMatch = rawText.match(anchorPattern);
+    const anchorId = anchorMatch ? anchorMatch[1] : null;
+
+    // 移除锚点注释，保留纯文本
+    const text = rawText.replace(anchorPattern, '').trim();
     const depth = tabs.length;
     const node: TaskNode = {
       checked: checked === 'x',
       text,
+      anchorId,
       children: []
     };
 
@@ -286,7 +310,9 @@ function parseTaskListWithIndent(content: string): string {
       const childrenHtml = nodeToHtml(node.children);
       // 如果有子任务，需要在 li 内部嵌套 ul
       const nestedList = childrenHtml ? `<ul data-type="taskList">${childrenHtml}</ul>` : '';
-      return `<li data-type="taskItem" data-checked="${node.checked}">${node.text}${nestedList}</li>`;
+      // 添加 data-anchor-id 属性保留锚点
+      const anchorAttr = node.anchorId ? ` data-anchor-id="${node.anchorId}"` : '';
+      return `<li data-type="taskItem" data-checked="${node.checked}"${anchorAttr}>${node.text}${nestedList}</li>`;
     }).join('');
 
     return items;
