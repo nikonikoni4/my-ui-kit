@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Editor } from '@tiptap/react';
-import { BubbleMenuPlugin } from '@tiptap/extension-bubble-menu';
 import {
   Bold,
   Italic,
@@ -98,25 +98,29 @@ export const BubbleMenuComponent: React.FC<BubbleMenuProps> = ({ editor }) => {
   };
 
   if (!isVisible) {
-    return (
+    // Use portal to render hidden menu at document.body level for measuring
+    return createPortal(
       <div
         ref={menuRef}
         style={{ position: 'fixed', visibility: 'hidden', pointerEvents: 'none' }}
         className="flex items-center gap-0.5 p-1 bg-white rounded-lg shadow-lg border border-gray-200"
       >
         <MenuButton icon={<Bold size={16} />} isActive={false} onClick={() => {}} />
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
+  // Use portal to render menu at document.body level
+  // This fixes positioning issues when parent has backdrop-filter/transform
+  return createPortal(
     <div
       ref={menuRef}
       style={{
         position: 'fixed',
         top: position.top,
         left: position.left,
-        zIndex: 50,
+        zIndex: 9999,
       }}
       className="flex items-center gap-0.5 p-1 bg-white rounded-lg shadow-lg border border-gray-200"
     >
@@ -157,6 +161,7 @@ export const BubbleMenuComponent: React.FC<BubbleMenuProps> = ({ editor }) => {
         onClick={setLink}
         title="Link"
       />
-    </div>
+    </div>,
+    document.body
   );
 };
