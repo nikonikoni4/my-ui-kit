@@ -14,7 +14,7 @@ import {
     getNextWeek,
     getPrevWeek,
 } from './utils';
-import { WEEK_DAYS, CELL_HEIGHT, DEFAULT_CONFIG } from './constants';
+import { WEEK_DAYS, DEFAULT_CONFIG } from './constants';
 
 /**
  * TaskCalendar - 高复用性任务日历组件
@@ -150,12 +150,12 @@ export const TaskCalendar: React.FC<TaskCalendarProps> = ({
                 key={task.id}
                 onClick={(e) => handleTaskClick(task, date, e)}
                 className={`
-                    w-full rounded-md border p-1.5 text-xs text-white backdrop-blur-sm shadow-sm 
-                    transition-transform hover:scale-[1.02] cursor-pointer
+                    w-full rounded-md border p-1.5 text-xs text-white backdrop-blur-sm shadow-sm
+                    transition-transform hover:scale-[1.02] cursor-pointer flex-shrink-0
                     ${task.color || 'bg-white/10 border-white/10'}
                 `}
             >
-                <div className="truncate font-medium opacity-90">{task.title}</div>
+                <div className="line-clamp-2 font-medium opacity-90">{task.title}</div>
             </div>
         );
     };
@@ -277,12 +277,11 @@ export const TaskCalendar: React.FC<TaskCalendarProps> = ({
                     </div>
 
                     {/* 日期网格 */}
-                    <div className="grid grid-cols-7 gap-3 transition-all duration-500 ease-in-out">
+                    <div className={`grid grid-cols-7 gap-3 transition-all duration-500 ease-in-out ${viewMode === 'month' ? 'auto-rows-[9rem] md:auto-rows-[10rem]' : ''}`}>
                         {calendarGrid.map((item, index) => {
                             const isActive = isSameDay(item.date, selectedDate);
                             const isTodayDate = isToday(item.date);
                             const dayTasks = getTasksForDate(item.date);
-                            const heightClass = CELL_HEIGHT[viewMode];
 
                             return (
                                 <div
@@ -290,7 +289,7 @@ export const TaskCalendar: React.FC<TaskCalendarProps> = ({
                                     onClick={() => handleDateClick(item.date)}
                                     className={`
                                         group/cell relative flex flex-col items-start justify-start rounded-2xl border border-white/5 p-3 transition-all duration-300 cursor-pointer overflow-hidden
-                                        ${heightClass}
+                                        ${viewMode === 'week' ? 'min-h-[400px]' : 'h-full'}
                                         ${!item.isCurrentMonth && viewMode === 'month' ? 'bg-black/5 opacity-40' : 'bg-white/5'}
                                         ${isActive
                                             ? 'ring-1 ring-blue-400/50 bg-white/10 shadow-[0_0_15px_rgba(59,130,246,0.2)] z-10'
@@ -312,7 +311,7 @@ export const TaskCalendar: React.FC<TaskCalendarProps> = ({
                                     </div>
 
                                     {/* 任务列表区域 */}
-                                    <div className="w-full flex-1 flex flex-col gap-1.5 overflow-y-auto overflow-x-hidden no-scrollbar">
+                                    <div className="w-full flex-1 flex flex-col gap-1.5 overflow-y-auto overflow-x-hidden no-scrollbar min-h-0">
                                         {dayTasks.map((task) => renderTaskItem(task, item.date))}
 
                                         {/* 空状态 */}

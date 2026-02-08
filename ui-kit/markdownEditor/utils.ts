@@ -61,12 +61,32 @@ function jsonToMarkdown(node: any, listDepth = 0): string {
       return content?.map((item: any) => jsonToMarkdown(item, listDepth)).join('') || '';
     case 'orderedList':
       return content?.map((item: any, index: number) => {
-        const itemContent = item.content?.map((child: any) => jsonToMarkdown(child, listDepth)).join('') || '';
-        return '  '.repeat(listDepth) + `${index + 1}. ` + itemContent.trim() + '\n';
+        const parts = item.content || [];
+        let textContent = '';
+        let nestedContent = '';
+        for (const child of parts) {
+          if (child.type === 'bulletList' || child.type === 'orderedList') {
+            nestedContent += jsonToMarkdown(child, listDepth + 1);
+          } else {
+            textContent += jsonToMarkdown(child, listDepth);
+          }
+        }
+        return '  '.repeat(listDepth) + `${index + 1}. ` + textContent.trim() + '\n' + nestedContent;
       }).join('') + '\n';
-    case 'listItem':
+    case 'listItem': {
       const indent = '  '.repeat(listDepth);
-      return indent + '- ' + childContent.trim() + '\n';
+      const parts = content || [];
+      let textContent = '';
+      let nestedContent = '';
+      for (const child of parts) {
+        if (child.type === 'bulletList' || child.type === 'orderedList') {
+          nestedContent += jsonToMarkdown(child, listDepth + 1);
+        } else {
+          textContent += jsonToMarkdown(child, listDepth);
+        }
+      }
+      return indent + '- ' + textContent.trim() + '\n' + nestedContent;
+    }
     case 'taskListContainer': {
       const taskContent = content?.map((item: any) => jsonToMarkdown(item, 0)).join('') || '';
       return `<!-- lp:todoblock -->\n${taskContent}<!-- /lp:todoblock -->\n\n`;
@@ -179,11 +199,8 @@ export function markdownToHtml(markdown: string): string {
   // Handle taskblock comments and task lists
   html = parseTaskBlocks(html);
 
-  // Unordered lists
-  html = html.replace(/^- (.+)$/gm, '<ul><li>$1</li></ul>');
-
-  // Ordered lists
-  html = html.replace(/^\d+\. (.+)$/gm, '<ol><li>$1</li></ol>');
+  // Bullet and ordered lists (with nesting support)
+  html = parseListBlocks(html);
 
   // Blockquotes
   html = html.replace(/^&gt; (.+)$/gm, '<blockquote><p>$1</p></blockquote>');
@@ -320,4 +337,87 @@ function parseTaskListWithIndent(content: string): string {
 
   const innerHtml = nodeToHtml(root);
   return innerHtml ? `<ul data-type="taskList">${innerHtml}</ul>` : '';
+}
+
+/**
+ * 解析带缩进的 bullet/ordered 列表为嵌套 HTML 结构
+ * 支持 2 空格缩进嵌套，参照 parseTaskListWithIndent 的栈结构算法
+ */
+function parseListBlocks(html: string): string {
+  const lines = html.split('\n');
+  const result: string[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const listMatch = lines[i].match(/^(\s*)(-|\d+\.)\s+(.+)$/);
+    if (listMatch) {
+      // 收集连续的列表行
+      const listLines: { indent: number; marker: string; text: string }[] = [];
+      while (i < lines.length) {
+        const lm = lines[i].match(/^(\s*)(-|\d+\.)\s+(.+)$/);
+        if (!lm) break;
+        listLines.push({ indent: lm[1].length, marker: lm[2], text: lm[3] });
+        i++;
+      }
+      result.push(buildNestedListHtml(listLines));
+    } else {
+      result.push(lines[i]);
+      i++;
+    }
+  }
+
+  return result.join('\n');
+}
+
+
+function buildNestedListHtml(items: { indent: number; marker: string; text: string }[]): string {
+  interface ListNode {
+    type: 'ul' | 'ol';
+    text: string;
+    children: ListNode[];
+  }
+
+  const root: ListNode[] = [];
+  const stack: { node: ListNode; indent: number }[] = [];
+
+  for (const item of items) {
+    const type: 'ul' | 'ol' = item.marker === '-' ? 'ul' : 'ol';
+    const node: ListNode = { type, text: item.text, children: [] };
+
+    while (stack.length > 0 && stack[stack.length - 1].indent >= item.indent) {
+      stack.pop();
+    }
+
+    if (stack.length === 0) {
+      root.push(node);
+    } else {
+      stack[stack.length - 1].node.children.push(node);
+    }
+
+    stack.push({ node, indent: item.indent });
+  }
+
+  function nodesToHtml(nodes: ListNode[]): string {
+    if (nodes.length === 0) return '';
+
+    let html = '';
+    let idx = 0;
+
+    while (idx < nodes.length) {
+      const currentType = nodes[idx].type;
+      let itemsHtml = '';
+
+      while (idx < nodes.length && nodes[idx].type === currentType) {
+        const childHtml = nodesToHtml(nodes[idx].children);
+        itemsHtml += `<li>${nodes[idx].text}${childHtml}</li>`;
+        idx++;
+      }
+
+      html += `<${currentType}>${itemsHtml}</${currentType}>`;
+    }
+
+    return html;
+  }
+
+  return nodesToHtml(root);
 }
