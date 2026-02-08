@@ -12,6 +12,7 @@ export const TaskItemWithAnchor = TaskItem.extend({
       ...this.parent?.(),
       anchorId: {
         default: null,
+        keepOnSplit: false,
         parseHTML: element => element.getAttribute('data-anchor-id'),
         renderHTML: attributes => {
           if (!attributes.anchorId) {
