@@ -105,12 +105,53 @@ export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const reasonTextareaRef = useRef<HTMLTextAreaElement>(null);
 
+    // Local state for content editing (debounced)
+    const [localContent, setLocalContent] = useState(item.content);
+    const isEditingContentRef = useRef(false);
+    const contentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Sync from parent when not editing
+    useEffect(() => {
+        if (!isEditingContentRef.current) {
+            setLocalContent(item.content);
+        }
+    }, [item.content]);
+
+    // Cleanup debounce timer
+    useEffect(() => {
+        return () => {
+            if (contentDebounceRef.current) clearTimeout(contentDebounceRef.current);
+        };
+    }, []);
+
+    const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newContent = e.target.value;
+        setLocalContent(newContent);
+        isEditingContentRef.current = true;
+        if (contentDebounceRef.current) clearTimeout(contentDebounceRef.current);
+        contentDebounceRef.current = setTimeout(() => {
+            onUpdate?.(item.id, { content: newContent } as Partial<T>);
+            contentDebounceRef.current = null;
+        }, 500);
+    };
+
+    const handleContentBlur = () => {
+        if (contentDebounceRef.current) {
+            clearTimeout(contentDebounceRef.current);
+            contentDebounceRef.current = null;
+        }
+        if (localContent !== item.content) {
+            onUpdate?.(item.id, { content: localContent } as Partial<T>);
+        }
+        setTimeout(() => { isEditingContentRef.current = false; }, 1000);
+    };
+
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
             textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
         }
-    }, [item.content]);
+    }, [localContent]);
 
     useEffect(() => {
         if (reasonTextareaRef.current) {
@@ -272,9 +313,11 @@ export function TodoItemDetailed<T extends BaseTodoItem = BaseTodoItem>({
                     {/* Task Content */}
                     <textarea
                         ref={textareaRef}
-                        value={item.content}
+                        value={localContent}
                         rows={1}
-                        onChange={(e) => onUpdate?.(item.id, { content: e.target.value } as Partial<T>)}
+                        onChange={handleContentChange}
+                        onBlur={handleContentBlur}
+                        onFocus={() => { isEditingContentRef.current = true; }}
                         onClick={(e) => e.stopPropagation()}
                         className={`
                             w-full bg-transparent border-none outline-none text-sm font-medium p-0 resize-none overflow-hidden
