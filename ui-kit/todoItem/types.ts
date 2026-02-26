@@ -167,12 +167,11 @@ export interface TodoItemTreeDetailedProps<T extends BaseTodoItem = BaseTodoItem
  * 保留此类型仅为向后兼容
  */
 export interface TodoItem extends BaseTodoItem {
-    id: number;
+    id: string;
     content: string;
     parentId: string | null;
     goalId: string | null;
     planDocId: string | null;
-    sourceAnchorId: string | null;
     state: 'pool' | 'scheduled' | 'completed' | 'shelved';
     scheduledDate: string | null;
     expectedFinishAt: string | null;
