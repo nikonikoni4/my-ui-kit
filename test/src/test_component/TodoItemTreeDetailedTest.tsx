@@ -3,7 +3,7 @@ import { type TodoItem } from '../../../ui-kit/todoItem/types';
 import { TodoItemTreeDetailed } from '../../../ui-kit/todoItem';
 const INITIAL_ITEMS: TodoItem[] = [
     {
-        id: 1,
+        id: '1',
         content: "Root Task 1",
         parentId: null,
         goalId: null,
@@ -21,7 +21,7 @@ const INITIAL_ITEMS: TodoItem[] = [
         poolOrderIndex: 0,
         children: [
             {
-                id: 11,
+                id: '11',
                 content: "Child Task 1.1",
                 parentId: '1',
                 goalId: null,
@@ -40,7 +40,7 @@ const INITIAL_ITEMS: TodoItem[] = [
                 children: []
             },
             {
-                id: 12,
+                id: '12',
                 content: "Child Task 1.2 (Completed)",
                 parentId: '1',
                 goalId: null,
@@ -61,7 +61,7 @@ const INITIAL_ITEMS: TodoItem[] = [
         ]
     },
     {
-        id: 2,
+        id: '2',
         content: "Root Task 2 (Delayed)",
         parentId: null,
         goalId: null,
@@ -83,9 +83,9 @@ const INITIAL_ITEMS: TodoItem[] = [
 
 export const TodoItemTreeDetailedTest: React.FC = () => {
     const [items, setItems] = useState(INITIAL_ITEMS);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
 
-    const handleUpdate = (id: number, updates: Partial<TodoItem>) => {
+    const handleUpdate = (id: string, updates: Partial<TodoItem>) => {
         console.log(`Update item ${id}:`, updates);
 
         // Helper to update recursively
@@ -104,7 +104,7 @@ export const TodoItemTreeDetailedTest: React.FC = () => {
         setItems(prev => updateRecursive(prev));
     };
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
         console.log(`Delete item ${id}`);
 
         // Helper to delete recursively
@@ -118,12 +118,12 @@ export const TodoItemTreeDetailedTest: React.FC = () => {
         setItems(prev => deleteRecursive(prev));
     };
 
-    const handleSelect = (id: number) => {
+    const handleSelect = (id: string) => {
         console.log(`Select item ${id}`);
         setSelectedId(id);
     };
 
-    const handleExpandChange = (id: number, expanded: boolean) => {
+    const handleExpandChange = (id: string, expanded: boolean) => {
         console.log(`Expand change item ${id}: ${expanded}`);
     };
 

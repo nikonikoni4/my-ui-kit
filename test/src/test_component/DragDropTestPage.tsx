@@ -36,7 +36,7 @@ const createMockTodoItem = (
     children?: TodoItem[],
     parentId: string | number | null = null
 ): TodoItem => ({
-    id,
+    id: String(id),
     content,
     parentId: parentId !== null ? String(parentId) : null,
     goalId: null,
@@ -139,10 +139,10 @@ function formatDate(dateStr: string): string {
 
 const NestedTodoTestSection: React.FC = () => {
     const [tasks, setTasks] = useState<TodoItem[]>(createNestedTasks);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
-    const expandState = useExpandedState([100, 101, 105, 112, 114, 200, 300, 301]); // 默认展开部分节点
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const expandState = useExpandedState(['100', '101', '105', '112', '114', '200', '300', '301']); // 默认展开部分节点
 
-    const handleUpdate = useCallback((id: number, updates: Partial<TodoItem>) => {
+    const handleUpdate = useCallback((id: string, updates: Partial<TodoItem>) => {
         const updateRecursive = (items: TodoItem[]): TodoItem[] => {
             return items.map(item => {
                 if (item.id === id) {
@@ -157,7 +157,7 @@ const NestedTodoTestSection: React.FC = () => {
         setTasks(prev => updateRecursive(prev));
     }, []);
 
-    const handleDelete = useCallback((id: number) => {
+    const handleDelete = useCallback((id: string) => {
         const deleteRecursive = (items: TodoItem[]): TodoItem[] => {
             return items
                 .filter(item => item.id !== id)
@@ -214,7 +214,7 @@ const NestedTodoTestSection: React.FC = () => {
                     🔄 重置
                 </button>
                 <button
-                    onClick={() => expandState.expandAll([100, 101, 105, 108, 112, 114, 200, 202, 300, 301])}
+                    onClick={() => expandState.expandAll(['100', '101', '105', '108', '112', '114', '200', '202', '300', '301'])}
                     className="px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors text-xs font-medium"
                 >
                     📂 全部展开
@@ -269,7 +269,7 @@ const createDailyFocusTasks = (): TodoItem[] => {
     return [
         // 已完成且按时
         {
-            id: 501,
+            id: '501',
             content: '✅ 完成需求文档评审',
             parentId: null,
             goalId: null,
@@ -288,7 +288,7 @@ const createDailyFocusTasks = (): TodoItem[] => {
         },
         // 已完成但延迟
         {
-            id: 502,
+            id: '502',
             content: '🎨 设计首页 UI 原型',
             parentId: null,
             goalId: null,
@@ -307,7 +307,7 @@ const createDailyFocusTasks = (): TodoItem[] => {
         },
         // 进行中，今天截止
         {
-            id: 503,
+            id: '503',
             content: '💻 实现登录模块前端',
             parentId: null,
             goalId: null,
@@ -325,7 +325,7 @@ const createDailyFocusTasks = (): TodoItem[] => {
             poolOrderIndex: null,
             children: [
                 {
-                    id: 5031,
+                    id: '5031',
                     content: '登录表单组件',
                     parentId: '503',
                     goalId: null,
@@ -343,7 +343,7 @@ const createDailyFocusTasks = (): TodoItem[] => {
                     poolOrderIndex: null,
                 },
                 {
-                    id: 5032,
+                    id: '5032',
                     content: '验证码逻辑',
                     parentId: '503',
                     goalId: null,
@@ -361,7 +361,7 @@ const createDailyFocusTasks = (): TodoItem[] => {
                     poolOrderIndex: null,
                 },
                 {
-                    id: 5033,
+                    id: '5033',
                     content: '第三方登录集成',
                     parentId: '503',
                     goalId: null,
@@ -382,7 +382,7 @@ const createDailyFocusTasks = (): TodoItem[] => {
         },
         // 已逾期
         {
-            id: 504,
+            id: '504',
             content: '📊 编写单元测试',
             parentId: null,
             goalId: null,
@@ -401,7 +401,7 @@ const createDailyFocusTasks = (): TodoItem[] => {
         },
         // 手动创建，剩余3天
         {
-            id: 505,
+            id: '505',
             content: '📚 阅读《Clean Code》第5章',
             parentId: null,
             goalId: null,
@@ -423,10 +423,10 @@ const createDailyFocusTasks = (): TodoItem[] => {
 
 const DailyFocusTestSection: React.FC = () => {
     const [tasks, setTasks] = useState<TodoItem[]>(createDailyFocusTasks);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
-    const expandState = useExpandedState([503]); // 默认展开第一个有子任务的
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const expandState = useExpandedState(['503']); // 默认展开第一个有子任务的
 
-    const handleUpdate = useCallback((id: number, updates: Partial<TodoItem>) => {
+    const handleUpdate = useCallback((id: string, updates: Partial<TodoItem>) => {
         const updateRecursive = (items: TodoItem[]): TodoItem[] => {
             return items.map(item => {
                 if (item.id === id) {
@@ -441,7 +441,7 @@ const DailyFocusTestSection: React.FC = () => {
         setTasks(prev => updateRecursive(prev));
     }, []);
 
-    const handleDelete = useCallback((id: number) => {
+    const handleDelete = useCallback((id: string) => {
         const deleteRecursive = (items: TodoItem[]): TodoItem[] => {
             return items
                 .filter(item => item.id !== id)
@@ -509,7 +509,7 @@ const DailyFocusTestSection: React.FC = () => {
                     🔄 重置
                 </button>
                 <button
-                    onClick={() => expandState.expandAll([503])}
+                    onClick={() => expandState.expandAll(['503'])}
                     className="px-3 py-1.5 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition-colors text-xs font-medium"
                 >
                     📂 展开子任务
@@ -794,8 +794,8 @@ interface ColumnProps {
     id: string;
     title: string;
     items: TodoItem[];
-    onUpdate: (id: number, updates: Partial<TodoItem>) => void;
-    onDelete: (id: number) => void;
+    onUpdate: (id: string, updates: Partial<TodoItem>) => void;
+    onDelete: (id: string) => void;
 }
 
 const SortableColumn = ({ id, title, items, onUpdate, onDelete }: ColumnProps) => {
@@ -846,17 +846,17 @@ const DragDropSortableTestSection: React.FC = () => {
         createMockTodoItem(811, 'Right Task 1', 'scheduled', '2023-10-27', undefined, null),
     ]);
 
-    const handleUpdate = (id: number, updates: Partial<TodoItem>) => {
+    const handleUpdate = (id: string, updates: Partial<TodoItem>) => {
         setLeftItems(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
         setRightItems(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
     };
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
         setLeftItems(prev => prev.filter(item => item.id !== id));
         setRightItems(prev => prev.filter(item => item.id !== id));
     };
 
-    const findContainer = (id: number): 'left' | 'right' | undefined => {
+    const findContainer = (id: string): 'left' | 'right' | undefined => {
         if (leftItems.find(item => item.id === id)) return 'left';
         if (rightItems.find(item => item.id === id)) return 'right';
         return undefined;
@@ -867,7 +867,7 @@ const DragDropSortableTestSection: React.FC = () => {
         dropArea: DropAreaData
     ) => {
         console.log('Cross Area Drop:', dragItem, '->', dropArea);
-        const itemId = Number(dragItem.id);
+        const itemId = String(dragItem.id);
         const sourceContainer = findContainer(itemId);
         const targetContainerId = dropArea.id;
 

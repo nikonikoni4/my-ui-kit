@@ -10,7 +10,7 @@ import type { TodoItem as TodoItemType } from '../../../ui-kit/todoItem/types';
 // --- Mock Data ---
 const MOCK_LEFT_ITEMS: TodoItemType[] = [
     {
-        id: 101,
+        id: '101',
         content: 'Left Task 1',
         parentId: null,
         goalId: null,
@@ -28,7 +28,7 @@ const MOCK_LEFT_ITEMS: TodoItemType[] = [
         poolOrderIndex: 0,
     },
     {
-        id: 102,
+        id: '102',
         content: 'Left Task 2',
         parentId: null,
         goalId: null,
@@ -49,7 +49,7 @@ const MOCK_LEFT_ITEMS: TodoItemType[] = [
 
 const MOCK_RIGHT_ITEMS: TodoItemType[] = [
     {
-        id: 201,
+        id: '201',
         content: 'Right Task 1',
         parentId: null,
         goalId: null,
@@ -73,8 +73,8 @@ interface ColumnProps {
     id: string;
     title: string;
     items: TodoItemType[];
-    onUpdate: (id: number, updates: Partial<TodoItemType>) => void;
-    onDelete: (id: number) => void;
+    onUpdate: (id: string, updates: Partial<TodoItemType>) => void;
+    onDelete: (id: string) => void;
 }
 
 const SortableColumn = ({ id, title, items, onUpdate, onDelete }: ColumnProps) => {
@@ -121,19 +121,19 @@ export default function DragDropTodoTest() {
     const [leftItems, setLeftItems] = useState<TodoItemType[]>(MOCK_LEFT_ITEMS);
     const [rightItems, setRightItems] = useState<TodoItemType[]>(MOCK_RIGHT_ITEMS);
 
-    const handleUpdate = (id: number, updates: Partial<TodoItemType>) => {
+    const handleUpdate = (id: string, updates: Partial<TodoItemType>) => {
         // Simple update handler for demo
         setLeftItems(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
         setRightItems(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
     };
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
         setLeftItems(prev => prev.filter(item => item.id !== id));
         setRightItems(prev => prev.filter(item => item.id !== id));
     };
 
     // Keep strict track of which lists to update
-    const findContainer = (id: number): 'left' | 'right' | undefined => {
+    const findContainer = (id: string): 'left' | 'right' | undefined => {
         if (leftItems.find(item => item.id === id)) return 'left';
         if (rightItems.find(item => item.id === id)) return 'right';
         return undefined;
@@ -144,7 +144,7 @@ export default function DragDropTodoTest() {
         dropArea: DropAreaData
     ) => {
         console.log('Cross Area Drop:', dragItem, '->', dropArea);
-        const itemId = dragItem.id as number;
+        const itemId = dragItem.id as string;
         const sourceContainer = findContainer(itemId);
         const targetContainerId = dropArea.id; // 'left-area' or 'right-area'
 
