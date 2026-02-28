@@ -116,52 +116,67 @@ export const HabitDashboardTest: React.FC = () => {
     return (
         <div className="bg-white text-neutral-900 font-sans h-full w-full overflow-hidden flex flex-col p-6 lg:p-8 gap-6 rounded-[32px] shadow-sm border border-neutral-100">
 
-            {/* 1. TOP OVERVIEW (Horizontal, Flat, Integrated into background) */}
-            <div className="w-full shrink-0 flex flex-col md:flex-row items-center justify-between pb-8 pt-4 border-b border-neutral-100/60">
+            {/* 1. TOP OVERVIEW (Modular Cards Grid) */}
+            <div className="w-full shrink-0 grid grid-cols-1 md:grid-cols-3 gap-6 pb-2">
 
-                {/* Left Stats */}
-                <div className="flex-shrink-0 min-w-[200px]">
-                    <h1 className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest mb-2">Today Dashboard</h1>
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-baseline gap-1.5">
-                            <span className="text-[40px] font-black tracking-tighter text-neutral-900 leading-none">2</span>
-                            <span className="text-[20px] font-bold text-neutral-300">/4</span>
+                {/* Left Stats - Visual Anchor */}
+                <div className="flex flex-col justify-between bg-neutral-900 rounded-[24px] p-6 shadow-md border border-neutral-800 relative overflow-hidden">
+                    <div className="relative z-10 flex items-center justify-between mb-4">
+                        <h1 className="text-[12px] font-bold text-white/50 uppercase tracking-widest">Today Dashboard</h1>
+                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+                            <ArrowRight size={14} className="text-white -rotate-45" />
                         </div>
-                        <span className="text-emerald-600 font-extrabold text-[15px] px-3.5 py-1 bg-emerald-50 rounded-full border border-emerald-100/50">
+                    </div>
+
+                    <div className="relative z-10 flex items-center justify-between mt-auto">
+                        <div className="flex items-baseline gap-1.5">
+                            <span className="text-[54px] font-black tracking-tighter text-white leading-none">2</span>
+                            <span className="text-[20px] font-bold text-white/40">/4</span>
+                        </div>
+                        <span className="text-emerald-400 font-extrabold text-[15px] px-3.5 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
                             50%
                         </span>
                     </div>
+                    {/* A subtle progress bar at the bottom */}
+                    <div className="relative z-10 w-full h-[4px] bg-white/10 rounded-full mt-5 overflow-hidden">
+                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: '50%' }} />
+                    </div>
+
+                    {/* Decorative background element, optional */}
+                    <div className="absolute top-[-50%] right-[-10%] w-[150px] h-[150px] bg-emerald-500/20 blur-[60px] rounded-full z-0 pointer-events-none" />
                 </div>
 
-                <div className="h-16 w-px bg-neutral-100 hidden md:block mx-8" />
-
                 {/* Heatmap Area */}
-                <div className="flex-1 max-w-lg px-2">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">12-Week Flow</h2>
+                <div className="flex flex-col justify-between bg-[#F4F5F7] rounded-[24px] p-6 shadow-sm border border-neutral-100">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest">12-Week Flow</h2>
+                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-neutral-50 transition-colors cursor-pointer shadow-sm">
+                            <ArrowRight size={14} className="text-neutral-400 -rotate-45" />
+                        </div>
                     </div>
-                    <div className="grid grid-flow-col grid-rows-5 gap-[5px] inline-grid">
+                    <div className="grid grid-flow-col grid-rows-5 gap-[5px] inline-grid self-start mt-auto">
                         {Array.from({ length: 12 * 5 }).map((_, i) => (
                             <div key={i} className={`w-[12px] h-[12px] rounded-[3px] border border-black/[0.03] ${Math.random() > 0.7 ? 'bg-emerald-500' :
                                 Math.random() > 0.4 ? 'bg-emerald-300' :
-                                    Math.random() > 0.2 ? 'bg-emerald-100' : 'bg-neutral-50'
+                                    Math.random() > 0.2 ? 'bg-emerald-100' : 'bg-white'
                                 }`} />
                         ))}
                     </div>
                 </div>
 
-                <div className="h-16 w-px bg-neutral-100 hidden md:block mx-8" />
-
                 {/* Trend Area */}
-                <div className="flex-shrink-0 min-w-[150px] pr-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">4-Week Trend</h2>
+                <div className="flex flex-col justify-between bg-[#F4F5F7] rounded-[24px] p-6 shadow-sm border border-neutral-100">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest">4-Week Trend</h2>
+                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-neutral-50 transition-colors cursor-pointer shadow-sm">
+                            <ArrowRight size={14} className="text-neutral-400 -rotate-45" />
+                        </div>
                     </div>
-                    <div className="flex items-end gap-2.5 h-[80px]">
-                        <div className="w-7 bg-neutral-100 hover:bg-neutral-200 transition-colors rounded-t-[6px] h-[50%]" />
-                        <div className="w-7 bg-neutral-100 hover:bg-neutral-200 transition-colors rounded-t-[6px] h-[70%]" />
-                        <div className="w-7 bg-neutral-100 hover:bg-neutral-200 transition-colors rounded-t-[6px] h-[40%]" />
-                        <div className="w-7 bg-emerald-500 rounded-t-[6px] h-[90%]" />
+                    <div className="flex items-end justify-between gap-3 h-[80px] w-full mt-auto">
+                        <div className="flex-1 bg-white hover:bg-neutral-200 transition-colors rounded-[8px] h-[50%]" />
+                        <div className="flex-1 bg-white hover:bg-neutral-200 transition-colors rounded-[8px] h-[70%]" />
+                        <div className="flex-1 bg-white hover:bg-neutral-200 transition-colors rounded-[8px] h-[40%]" />
+                        <div className="flex-1 bg-emerald-500 rounded-[8px] h-[90%] shadow-lg shadow-emerald-500/30" />
                     </div>
                 </div>
             </div>
@@ -245,68 +260,68 @@ export const HabitDashboardTest: React.FC = () => {
                 {/* 3. RIGHT CONTENT AREA - Cards & Chains */}
                 <div className="col-span-12 lg:col-span-9 flex flex-col h-full overflow-hidden gap-6">
 
-                    {/* Cards Container (Nested Grey Box) */}
-                    <div className="flex-1 bg-[#F4F5F7] rounded-[24px] p-2 pl-6 pr-4 pb-6 overflow-hidden flex flex-col no-scrollbar">
+                    {/* Cards Container (No unnecessary outer wrapper, direct list) */}
+                    <div className="flex-1 overflow-hidden flex flex-col no-scrollbar">
 
                         {/* Header */}
-                        <div className="flex items-center justify-between mb-2 mt-4 sticky top-0 bg-[#F4F5F7] z-10 pb-2">
-                            <h2 className="text-[12px] font-bold text-neutral-500 uppercase tracking-widest flex items-center gap-2">
-                                Active Habits <span className="bg-white/60 text-neutral-600 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">{activeHabits.length}</span>
+                        <div className="flex items-center justify-between mb-4 mt-2 shrink-0">
+                            <h2 className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
+                                Active Habits <span className="bg-[#F4F5F7] text-neutral-600 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">{activeHabits.length}</span>
                             </h2>
-                            <button className="text-xs font-bold text-neutral-500 flex items-center gap-1 hover:text-neutral-900 bg-white/50 px-3 py-1.5 rounded-full transition-colors">
+                            <button className="text-xs font-bold text-neutral-400 flex items-center gap-1 hover:text-neutral-900 bg-[#F4F5F7] px-3 py-1.5 rounded-full transition-colors border border-neutral-100">
                                 Filters
                             </button>
                         </div>
 
-                        {/* Scrolling Card List */}
-                        <div className="flex-1 overflow-y-auto no-scrollbar pr-2 mt-2">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+                        {/* Scrolling Card List (Strict Grid) */}
+                        <div className="flex-1 overflow-y-auto no-scrollbar pr-2">
+                            {/* Force exactly 2 columns on most screens to avoid irregular gaps */}
+                            <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
                                 {activeHabits.map(habit => (
-                                    <div key={habit.id} className="min-w-[260px] flex-1 max-w-[400px] bg-white rounded-[20px] p-5 shadow-[0_4px_15px_rgb(0,0,0,0.02)] border border-white/60 flex flex-col gap-4 transition-transform hover:-translate-y-0.5 duration-300 relative group min-h-[160px]">
+                                    <div key={habit.id} className="min-w-[240px] bg-white rounded-[20px] p-4 shadow-[0_4px_15px_rgb(0,0,0,0.02)] border border-neutral-200/60 flex flex-col justify-between transition-transform hover:-translate-y-0.5 duration-300 relative group h-[140px]">
 
-                                        {/* Top Header of Card */}
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1 pr-3">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <h3 className="text-[16px] font-bold text-neutral-900 tracking-tight leading-tight">{habit.name}</h3>
-                                                </div>
-
-                                                {/* Pill Tags inline */}
-                                                <div className="flex items-center flex-wrap gap-1.5 mb-1">
-                                                    <span className="bg-[#F4F5F7] px-2 py-1 rounded-full text-[10px] font-bold tracking-wide text-neutral-500 uppercase">{habit.frequency}</span>
-                                                    {habit.streak > 0 && (
-                                                        <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full tracking-wide">
-                                                            <Flame size={10} className="fill-amber-500" strokeWidth={2} /> {habit.streak}
-                                                        </span>
-                                                    )}
-                                                    {habit.tags.anchor && (
-                                                        <span className="flex items-center gap-1 text-blue-600 bg-blue-50/60 px-2.5 py-1 rounded-full text-[10px] font-bold">
-                                                            <Anchor size={10} strokeWidth={2.5} /> {habit.tags.anchor}
-                                                        </span>
-                                                    )}
+                                        <div>
+                                            {/* Top Header of Card */}
+                                            <div className="flex justify-between items-start mb-2.5">
+                                                <h3 className="text-[15px] font-bold text-neutral-900 tracking-tight leading-tight truncate pr-2">{habit.name}</h3>
+                                                <div className="flex flex-col items-end flex-shrink-0">
+                                                    <span className="text-[10px] font-black text-neutral-800">Lv.{habit.level.value}</span>
                                                 </div>
                                             </div>
 
-                                            {/* Right Side Stats */}
-                                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                                <span className="text-[11px] font-black text-neutral-800">Lv.{habit.level.value}</span>
-                                                <span className="text-[9px] font-bold text-neutral-400 tracking-wider w-full text-right">{habit.progress.current}/{habit.progress.total}</span>
+                                            {/* Pill Tags inline */}
+                                            <div className="flex items-center flex-wrap gap-1.5 mb-1 h-[22px] overflow-hidden">
+                                                <span className="bg-[#F4F5F7] px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wide text-neutral-500 uppercase">{habit.frequency}</span>
+                                                {habit.streak > 0 && (
+                                                    <span className="flex items-center gap-1 text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md tracking-wide">
+                                                        <Flame size={10} className="fill-amber-500" strokeWidth={2} /> {habit.streak}
+                                                    </span>
+                                                )}
+                                                {habit.tags.anchor && (
+                                                    <span className="flex items-center gap-1 text-blue-600 bg-blue-50/60 px-2.5 py-0.5 rounded-md text-[9px] font-bold">
+                                                        <Anchor size={10} strokeWidth={2.5} /> {habit.tags.anchor}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
 
                                         {/* Bottom Actions of Card */}
                                         <div className="flex items-center justify-between mt-auto">
                                             <div className="flex-1 mr-4">
-                                                <div className="h-[6px] w-full bg-[#F4F5F7] rounded-full overflow-hidden">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-[9px] font-bold text-neutral-400 tracking-wider">PROGRESS</span>
+                                                    <span className="text-[9px] font-bold text-neutral-500 tracking-wider">{habit.progress.current}/{habit.progress.total}</span>
+                                                </div>
+                                                <div className="h-[4px] w-full bg-[#F4F5F7] rounded-full overflow-hidden">
                                                     <div className="h-full bg-neutral-900 rounded-full transition-all duration-500" style={{ width: `${(habit.progress.current / habit.progress.total) * 100}%` }} />
                                                 </div>
                                             </div>
                                             {habit.todayStatus === 'done' ? (
-                                                <button className="flex items-center justify-center bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full text-[11px] font-bold transition-colors hover:bg-emerald-100 border border-emerald-100/50">
-                                                    <Check size={14} strokeWidth={3} className="mr-1" /> DONE
+                                                <button className="flex items-center justify-center bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-md text-[10px] font-bold transition-colors hover:bg-emerald-100 border border-emerald-100/50">
+                                                    <Check size={12} strokeWidth={3} className="mr-1" /> DONE
                                                 </button>
                                             ) : (
-                                                <button className="flex items-center justify-center bg-neutral-900 text-white px-5 py-2 rounded-full text-[11px] font-bold transition-all hover:bg-neutral-800 hover:scale-105 active:scale-95 shadow-lg shadow-neutral-900/20">
+                                                <button className="flex items-center justify-center bg-neutral-900 text-white px-4 py-1.5 rounded-md text-[10px] font-bold transition-all hover:bg-neutral-800 hover:scale-105 active:scale-95 shadow-md shadow-neutral-900/20">
                                                     CHECK IN
                                                 </button>
                                             )}
@@ -315,14 +330,14 @@ export const HabitDashboardTest: React.FC = () => {
                                 ))}
 
                                 {pausedHabits.map(habit => (
-                                    <div key={habit.id} className="bg-transparent border-2 border-dashed border-neutral-200/80 rounded-[20px] p-5 flex flex-col justify-center min-h-[160px] group cursor-pointer hover:border-neutral-300 transition-colors">
+                                    <div key={habit.id} className="bg-[#F4F5F7]/50 border border-dashed border-neutral-300 rounded-[20px] p-4 flex flex-col justify-center h-[140px] group cursor-pointer hover:bg-[#F4F5F7] hover:border-neutral-400 transition-colors">
                                         <div className="flex justify-between items-center mb-3">
-                                            <h3 className="text-[15px] font-bold text-neutral-400 line-through decoration-neutral-300">{habit.name}</h3>
+                                            <h3 className="text-[14px] font-bold text-neutral-400 line-through decoration-neutral-300">{habit.name}</h3>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className="bg-white/60 text-neutral-400 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase">Paused</span>
-                                            <button className="text-[11px] font-bold text-neutral-400 ml-auto flex items-center gap-1 hover:text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Play size={10} className="fill-current" />
+                                            <span className="bg-white text-neutral-400 px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wide uppercase border border-neutral-200">Paused</span>
+                                            <button className="text-[10px] font-bold text-neutral-400 ml-auto flex items-center gap-1 hover:text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Play size={10} className="fill-current mr-1" /> Resume
                                             </button>
                                         </div>
                                     </div>
@@ -331,41 +346,56 @@ export const HabitDashboardTest: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Established Chains (Flat Sub-container) */}
-                    <div className="bg-[#F4F5F7] rounded-[24px] p-5 shrink-0">
-                        <h2 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <ListTree size={16} /> Activity Chains
-                        </h2>
+                    {/* Established Chains (Integrated Modular Footer) */}
+                    <div className="shrink-0 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-[12px] font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
+                                <ListTree size={14} className="text-emerald-500" /> Activity Chains
+                            </h2>
+                            <button className="text-[10px] font-bold text-neutral-400 hover:text-neutral-900 transition-colors uppercase tracking-wider">
+                                View All
+                            </button>
+                        </div>
 
-                        <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-4">
-                            {mockChains.map(chain => {
-                                const displayNodes = chain.nodes.slice(0, 3);
-                                const hasMore = chain.nodes.length > 3;
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {mockChains.map((chain, index) => {
+                                const displayNodes = chain.nodes.slice(0, 4);
+                                const hasMore = chain.nodes.length > 4;
+                                // Alternate background style for variety, similar to the 4-week trend blocks
+                                const isAlternate = index % 2 === 1;
 
                                 return (
-                                    <div key={chain.id} className="bg-white rounded-[16px] p-4 border border-black/[0.04] flex-1 min-w-[280px] max-w-[360px] shadow-sm">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <h3 className="text-[13px] font-bold text-neutral-800">{chain.name}</h3>
-                                            <span className="bg-[#F4F5F7] text-neutral-500 font-bold text-[10px] px-2 py-0.5 rounded-full">{chain.nodes.length} steps</span>
+                                    <div key={chain.id} className={`rounded-[20px] p-5 border ${isAlternate ? 'bg-white border-neutral-200/60 shadow-sm' : 'bg-[#F4F5F7] border-neutral-100'} flex flex-col gap-3 transition-colors hover:border-neutral-300`}>
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="text-[14px] font-bold text-neutral-900 tracking-tight">{chain.name}</h3>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wide ${isAlternate ? 'bg-neutral-100 text-neutral-500' : 'bg-white shadow-sm text-neutral-600'}`}>
+                                                    {chain.nodes.length} steps
+                                                </span>
+                                                <button className="text-neutral-400 hover:text-emerald-500 transition-colors">
+                                                    <Play size={14} className="fill-current" />
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        <div className="flex items-center gap-1.5 overflow-hidden w-full">
+                                        <div className="flex items-center gap-1.5 overflow-hidden w-full mt-1">
                                             {displayNodes.map((node, idx) => (
                                                 <React.Fragment key={node.id}>
-                                                    <div className={`px-2.5 py-1 rounded-md border flex-shrink-0 text-[11px] font-bold tracking-tight ${node.isHabit ? 'bg-white border-neutral-300 text-neutral-900 shadow-sm' : 'bg-[#FAF9F7] border-transparent text-neutral-500'}`}>
+                                                    <div className={`px-2.5 py-1.5 rounded-[8px] border shrink-0 text-[10px] font-bold tracking-tight flex items-center gap-1.5 ${node.isHabit ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-500/20' : isAlternate ? 'bg-[#F4F5F7] border-transparent text-neutral-600' : 'bg-white border-neutral-200/50 text-neutral-600 shadow-sm'}`}>
+                                                        {node.isHabit && <Check size={10} strokeWidth={4} />}
                                                         {node.name}
                                                     </div>
                                                     {idx < displayNodes.length - 1 && (
-                                                        <ArrowRight size={10} className="text-neutral-300 flex-shrink-0" />
+                                                        <ArrowRight size={10} className="text-neutral-300 shrink-0" />
                                                     )}
                                                 </React.Fragment>
                                             ))}
 
                                             {hasMore && (
                                                 <>
-                                                    <ArrowRight size={10} className="text-neutral-300 flex-shrink-0" />
-                                                    <div className="w-8 h-[24px] rounded-md border border-neutral-200 border-dashed flex items-center justify-center text-neutral-400 bg-[#FAF9F7] flex-shrink-0 cursor-pointer hover:bg-neutral-200 transition-colors">
-                                                        <MoreHorizontal size={12} />
+                                                    <ArrowRight size={10} className="text-neutral-300 shrink-0" />
+                                                    <div className={`px-2 py-1.5 rounded-[8px] border border-dashed flex items-center justify-center shrink-0 cursor-pointer transition-colors ${isAlternate ? 'border-neutral-300 text-neutral-400 hover:bg-neutral-100' : 'bg-[#FAF9F7] border-neutral-300 text-neutral-400 hover:bg-white'}`}>
+                                                        <span className="text-[10px] font-bold">+{chain.nodes.length - 4}</span>
                                                     </div>
                                                 </>
                                             )}
@@ -375,7 +405,6 @@ export const HabitDashboardTest: React.FC = () => {
                             })}
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
